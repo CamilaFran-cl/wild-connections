@@ -23,3 +23,4 @@ Next.js 14 (App Router) + Supabase (PostgreSQL/Auth/RLS) + TypeScript + Tailwind
 
 ## Documentación de diseño
 Todo el diseño vive en `docs/design/`. Empieza por `CLAUDE.md`.
+
