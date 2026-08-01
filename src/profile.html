@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentina Tanono — Wild Connections</title>
+    <meta name="description" content="Perfil de Valentina Tanono, mentora en Liderazgo Femenino. Reserva sesiones exclusivas en Wild Connections.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container navbar-inner">
+            <a href="index.html" class="nav-brand nav-logo"><img src="assets/logos/logo-principal-blanco.png" alt="Wild Connections" class="nav-logo-img" style="height:28px"></a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="matches.html" class="nav-link">Mentoras</a>
+                <a href="pricing.html" class="nav-link">Planes</a>
+                <a href="#" class="nav-link">Nosotras</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-notification btn-icon" aria-label="Notificaciones">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                </button>
+                <a href="pricing.html" class="btn btn-gold btn-sm">Ver Planes</a>
+                <button class="nav-toggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-page page-content">
+        <div class="container">
+            <a href="matches.html" class="back-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+                Volver a matches
+            </a>
+
+            <div class="profile-header reveal">
+                <div class="profile-avatar-wrapper mb-6">
+                    <img src="assets/mentor-isabella.jpg" alt="Mentora" class="avatar avatar-xl profile-avatar-glow" id="dynamic-avatar">
+                    <span class="badge badge-vip" style="position: absolute; bottom: 10px; right: 0;">VIP</span>
+                </div>
+                <h1 class="profile-name" id="dynamic-name">Cargando...</h1>
+                <div id="dynamic-meta" style="display: flex; gap: var(--space-4); justify-content: center; align-items: center; margin-bottom: var(--space-3); color: var(--gold-primary); font-size: 0.95rem;"></div>
+                <p class="profile-bio" id="dynamic-bio" style="font-size: var(--text-lg); color: var(--text-secondary); margin-bottom: var(--space-4);">Cargando perfil...</p>
+                <div class="mentor-tags" id="dynamic-tags" style="justify-content: center; margin-bottom: var(--space-6);">
+                    <!-- Tags will be injected here -->
+                </div>
+                <div id="dynamic-details" style="max-width: 650px; margin: 0 auto var(--space-8); text-align: left;"></div>
+            </div>
+
+            <section class="services-section reveal">
+                <h3 class="services-title">Servicios Disponibles</h3>
+                <div class="grid-4">
+                    <div class="service-card">
+                        <div class="service-icon icon-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </div>
+                        <h4 class="service-name">Sesiones 1-on-1</h4>
+                        <a class="btn btn-outline btn-sm btn-book">Reservar</a>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon icon-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                        <h4 class="service-name">Taller de Escalado</h4>
+                        <a class="btn btn-outline btn-sm btn-book">Reservar</a>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon icon-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        </div>
+                        <h4 class="service-name">Sesiones de Finanzas</h4>
+                        <a class="btn btn-outline btn-sm btn-book">Reservar</a>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon icon-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z"></path></svg>
+                        </div>
+                        <h4 class="service-name">1-on-1 de Escalado</h4>
+                        <a class="btn btn-outline btn-sm btn-book">Reservar</a>
+                    </div>
+                </div>
+            </section>
+
+            <div class="profile-cta reveal">
+                <div class="gold-line gold-line--center mb-6"></div>
+                <p>Suscríbete para acceder al contacto directo con Valentina y reservar sus servicios exclusivos.</p>
+                <a href="pricing.html" class="btn btn-gold btn-lg shimmer-effect">Suscríbete</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <span class="footer-brand"><img src="assets/logos/logo-secundario-crema.png" alt="Wild Connections" style="height:24px"></span>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Términos</a>
+                    <a href="#" class="footer-link">Privacidad</a>
+                    <a href="#" class="footer-link">Contacto</a>
+                    <a href="#" class="footer-link">Ayuda</a>
+                </div>
+            </div>
+            <p class="footer-copyright">© 2025 Wild Goddess Magazine®. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <nav class="mobile-nav">
+        <div class="mobile-nav-inner">
+            <a href="index.html" class="mobile-nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Inicio
+            </a>
+            <a href="matches.html" class="mobile-nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Buscar
+            </a>
+            <a href="matches.html" class="mobile-nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                Matches
+            </a>
+            <a href="profile.html" class="mobile-nav-item active">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Perfil
+            </a>
+        </div>
+    </nav>
+
+    <script src="js/main.js"></script>
+    <script src="js/user.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Regístrate en Wild Connections — Tu lugar en el espacio de Networking. Responde el cuestionario para que podamos conectarte con las mujeres ideales para ti.">
+    <title>Registro — Wild Connections</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/registration.css">
+</head>
+<body class="theme-dark">
+
+    <!-- Fixed Header -->
+    <header class="reg-header">
+        <a href="index.html">
+            <img src="assets/logos/logo-principal-blanco.png" alt="Wild Connections" class="nav-logo-img">
+        </a>
+        <div class="reg-autosave" id="autosave-indicator">
+            <span class="save-dot"></span>
+            <span class="save-label">Auto-guardado</span>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="reg-progress" style="display: none;">
+        <div class="progress-steps" id="progress-steps"></div>
+        <div class="progress-info">
+            <span id="progress-label"></span>
+            <span>~8 min</span>
+        </div>
+    </div>
+
+    <!-- Form Content (dynamically rendered) -->
+    <main class="reg-form-container" id="form-container">
+        <!-- Sections render here -->
+    </main>
+
+    <!-- Confirmation Screen (hidden) -->
+    <main class="reg-form-container">
+        <div class="reg-confirmation" id="confirmation-screen">
+            <!-- Populated by JS on submit -->
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="reg-nav" style="display: none;">
+        <div class="reg-nav-inner">
+            <button class="btn-reg-back" id="btn-back" disabled>← Anterior</button>
+            <button class="btn-reg-next" id="btn-next">Siguiente →</button>
+        </div>
+    </nav>
+
+    <!-- Particles Background -->
+    <div class="particles-container" id="particles-js"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/registration-form.js"></script>
+
+</body>
+</html>
