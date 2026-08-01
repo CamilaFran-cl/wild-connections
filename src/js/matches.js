@@ -209,20 +209,30 @@ function renderMentors(filterText = '') {
       : '';
 
     const cardHtml = `
-<div class="mentor-card hover-lift-glow animate-fadeInUp">
-    <img src="${mentor.image}" alt="${mentor.name}" class="avatar">
-    <div class="mentor-info">
-        <h3 class="mentor-name">${mentor.name} <span class="text-gold text-xs">${mentor.bffScore}% Afinidad</span></h3>
-        <p class="mentor-specialty">${mentor.specialty}</p>
-        ${locationHtml}
-        <div class="mentor-tags">
+<div class="mentor-card hover-lift-glow animate-fadeInUp" style="align-items: flex-start; padding: var(--space-6);">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-3); min-width: 100px;">
+        <img src="${mentor.image}" alt="${mentor.name}" class="avatar avatar-lg avatar-gold">
+        <span class="badge badge-gold" style="font-size: 0.7rem;">${mentor.bffScore}% Afinidad</span>
+    </div>
+    
+    <div class="mentor-info" style="flex: 1; min-width: 0; padding-left: var(--space-2);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2);">
+            <div>
+                <h3 class="mentor-name" style="font-size: 1.25rem; margin-bottom: 2px;">${mentor.name}</h3>
+                <p class="mentor-specialty" style="font-size: 0.95rem; margin-bottom: 4px;">${mentor.specialty}</p>
+                ${mentor.location ? `<p style="font-size: 0.8rem; color: var(--text-tertiary);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>${mentor.location}</p>` : ''}
+            </div>
             ${commercialBadge}
+        </div>
+        
+        <div class="mentor-tags" style="margin-bottom: var(--space-5);">
             ${tagsHtml}
         </div>
-    </div>
-    <div style="display: flex; gap: var(--space-2); margin-top: var(--space-4);">
-        <a href="profile.html?id=${mentor.id}" class="btn btn-gold btn-sm" style="flex: 1;">Perfil</a>
-        <button class="btn btn-outline btn-sm btn-coffee" style="flex: 1;" data-mentor="${mentor.name}">Invitar un Café ☕</button>
+        
+        <div class="mentor-actions" style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+            <a href="profile.html?id=${mentor.id}" class="btn btn-gold btn-sm">Ver Perfil</a>
+            <button class="btn btn-outline btn-sm btn-coffee" data-mentor="${mentor.name}">Invitar un Café ☕</button>
+        </div>
     </div>
 </div>
     `;
