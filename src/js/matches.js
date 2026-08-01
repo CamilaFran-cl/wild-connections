@@ -204,9 +204,9 @@ function renderMentors(filterText = '') {
       ? `<span class="badge-commercial" title="Match comercial: tu expertise y sus necesidades se cruzan">💼 Match Comercial</span>`
       : '';
 
-    const locationHtml = mentor.location
-      ? `<span class="mentor-location">📍 ${mentor.location}</span>`
-      : '';
+    const profileHref = isVip ? `profile.html?id=${mentor.id}` : '#';
+    const profileClass = isVip ? 'btn btn-gold btn-sm' : 'btn btn-gold btn-sm btn-protected';
+    const coffeeClass = isVip ? 'btn btn-outline btn-sm btn-coffee' : 'btn btn-outline btn-sm btn-coffee btn-protected';
 
     const cardHtml = `
 <div class="mentor-card hover-lift-glow animate-fadeInUp" style="align-items: flex-start; padding: var(--space-6);">
@@ -230,8 +230,8 @@ function renderMentors(filterText = '') {
         </div>
         
         <div class="mentor-actions" style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
-            <a href="profile.html?id=${mentor.id}" class="btn btn-gold btn-sm">Ver Perfil</a>
-            <button class="btn btn-outline btn-sm btn-coffee" data-mentor="${mentor.name}">Invitar un Café ☕</button>
+            <a href="${profileHref}" class="${profileClass}">Ver Perfil</a>
+            <button class="${coffeeClass}" data-mentor="${mentor.name}">Invitar un Café ☕</button>
         </div>
     </div>
 </div>
@@ -240,15 +240,52 @@ function renderMentors(filterText = '') {
     container.insertAdjacentHTML('beforeend', cardHtml);
   });
 
-  // Coffee button listeners
-  container.querySelectorAll('.btn-coffee').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      const mentorName = e.target.getAttribute('data-mentor');
-      showToast(`¡Invitación a café enviada a ${mentorName}!`);
-      e.target.textContent = 'Enviado ✓';
-      e.target.disabled = true;
-    });
+  // VIP Coffee button listeners
+  if (isVip) {
+      container.querySelectorAll('.btn-coffee').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const mentorName = e.target.getAttribute('data-mentor');
+          showToast(`¡Invitación a café enviada a ${mentorName}!`);
+          e.target.textContent = 'Enviado ✓';
+          e.target.disabled = true;
+        });
+      });
+  }
+
+  // Protected action listeners (Free users)
+  container.querySelectorAll('.btn-protected').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          showUpgradeToast();
+      });
   });
+}
+
+function showUpgradeToast() {
+  let toastContainer = document.querySelector('.toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.flexDirection = 'column';
+  toast.style.alignItems = 'flex-start';
+  toast.innerHTML = `
+    <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 8px;">
+        <svg width="20" height="20" stroke="var(--gold-primary)" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> 
+        <strong style="color:var(--gold-primary);">Acceso VIP Requerido</strong>
+    </div>
+    <p style="font-size: 0.85rem; margin-bottom: 12px; line-height: 1.4;">Sube al Plan VIP Anual para ver el perfil completo, reservar sesiones y contactar a esta mentora.</p>
+    <button class="btn btn-gold btn-sm shimmer-effect" style="width:100%" onclick="window.location.href='pricing.html'">Ver Planes VIP</button>
+  `;
+  toastContainer.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('fade-out');
+    setTimeout(() => toast.remove(), 300);
+  }, 6000);
 }
 
 function showToast(message) {

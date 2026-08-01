@@ -1,47 +1,17 @@
 'use strict';
 
 const planesInfo = {
-    mensual: {
-        nombre: 'Plan Mensual',
-        precioBase: '$29',
-        periodo: '/mes',
-        total: '$29.00',
-        beneficios: [
-            'Acceso a Mentoras Verificadas',
-            '3 Sesiones 1-on-1 al mes',
-            'Chat Directo con Mentoras',
-            'Invitaciones a Cafés Virtuales'
-        ]
-    },
-    trimestral: {
-        nombre: 'Plan Trimestral',
-        precioBase: '$69',
-        periodo: '/trimestre',
-        total: '$69.00',
-        beneficios: [
-            'Acceso a Mentoras Verificadas',
-            '3 Sesiones 1-on-1 al mes',
-            'Chat Directo con Mentoras',
-            'Invitaciones a Cafés Virtuales',
-            'Acceso a Talleres Grupales',
-            'Prioridad en Matches'
-        ]
-    },
     anual: {
-        nombre: 'Plan Anual',
-        precioBase: '$199',
+        nombre: 'Suscripción VIP Anual',
+        precioBase: '$297',
         periodo: '/año',
-        total: '$199.00',
+        total: '$297.00',
         beneficios: [
-            'Acceso a Mentoras Verificadas',
-            '3 Sesiones 1-on-1 al mes',
-            'Chat Directo con Mentoras',
-            'Invitaciones a Cafés Virtuales',
-            'Acceso a Talleres Grupales',
-            'Prioridad en Matches',
-            'Mentora Personal Asignada',
-            'Acceso Ilimitado a Sesiones',
-            'Badge VIP Exclusivo'
+            'Suscripción a la revista WGM',
+            'Acceso a perfiles completos',
+            'Matches proactivos con IA',
+            'Contacto directo con mentoras',
+            'Acceso a servicios exclusivos'
         ]
     }
 };
@@ -49,10 +19,10 @@ const planesInfo = {
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Read plan from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
-    let planId = urlParams.get('plan') || 'mensual';
+    let planId = urlParams.get('plan') || 'anual';
     
     if (!planesInfo[planId]) {
-        planId = 'mensual'; // Fallback to mensual
+        planId = 'anual'; // Fallback to anual
     }
     
     const plan = planesInfo[planId];
@@ -131,6 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            // Otorgar status VIP al usuario en el almacenamiento local
+            localStorage.setItem('wc_user_plan', 'vip');
             
             // Activate success overlay
             if (overlay) {

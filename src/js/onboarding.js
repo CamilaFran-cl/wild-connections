@@ -182,6 +182,11 @@ function finishOnboarding() {
     document.getElementById('progress-header').style.display = 'none';
     document.getElementById('questions-wrapper').style.display = 'none';
     
+    // Set user as free tier initially
+    if (localStorage.getItem('wc_user_plan') !== 'vip') {
+        localStorage.setItem('wc_user_plan', 'free');
+    }
+    
     // Show analyzing screen
     const analyzingScreen = document.getElementById('analyzing-screen');
     analyzingScreen.classList.add('active');
