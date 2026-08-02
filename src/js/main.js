@@ -78,30 +78,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 7. Check Authentication State (Update Navigation)
-    const userPlan = localStorage.getItem('wc_user_plan');
-    if (userPlan) {
-        // User is logged in
-        const avatarUrl = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
+    async function updateNavState() {
+        let isAuthenticated = false;
         
-        // Desktop Navbar
-        const loginLinkDesktop = document.querySelector('.nav-actions a[href="login.html"]');
-        if (loginLinkDesktop) {
-            const profileLink = document.createElement('a');
-            profileLink.href = 'my-profile.html';
-            profileLink.className = 'nav-profile-avatar';
-            profileLink.style.cssText = 'margin-right: 15px; display: inline-block; width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold-primary); vertical-align: middle; cursor: pointer;';
-            profileLink.innerHTML = `<img src="${avatarUrl}" alt="Mi Perfil" style="width: 100%; height: 100%; object-fit: cover;">`;
-            loginLinkDesktop.replaceWith(profileLink);
+        if (typeof window.checkAuthSession === 'function') {
+            const session = await window.checkAuthSession();
+            isAuthenticated = !!session;
+            if (!isAuthenticated) {
+                // Si Supabase dice que no hay sesión, limpiamos el localStorage obsoleto
+                localStorage.removeItem('wc_user_plan');
+            } else if (!localStorage.getItem('wc_user_plan')) {
+                // Sincronizar localStorage si Supabase tiene sesión
+                localStorage.setItem('wc_user_plan', 'free');
+            }
+        } else {
+            // Fallback si no está supabase
+            isAuthenticated = !!localStorage.getItem('wc_user_plan');
         }
 
-        // Mobile Navbar
-        const loginLinkMobile = document.querySelector('.mobile-nav-inner a[href="login.html"]');
-        if (loginLinkMobile) {
-            loginLinkMobile.href = 'my-profile.html';
-            loginLinkMobile.innerHTML = `
-                <img src="${avatarUrl}" alt="Perfil" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-primary);">
-                Mi Perfil
-            `;
+        if (isAuthenticated) {
+            // User is logged in
+            const avatarUrl = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
+            
+            // Desktop Navbar
+            const loginLinkDesktop = document.querySelector('.nav-actions a[href="login.html"]');
+            if (loginLinkDesktop) {
+                const profileLink = document.createElement('a');
+                profileLink.href = 'my-profile.html';
+                profileLink.className = 'nav-profile-avatar';
+                profileLink.style.cssText = 'margin-right: 15px; display: inline-block; width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold-primary); vertical-align: middle; cursor: pointer;';
+                profileLink.innerHTML = `<img src="${avatarUrl}" alt="Mi Perfil" style="width: 100%; height: 100%; object-fit: cover;">`;
+                loginLinkDesktop.replaceWith(profileLink);
+            }
+
+            // Mobile Navbar
+            const loginLinkMobile = document.querySelector('.mobile-nav-inner a[href="login.html"]');
+            if (loginLinkMobile) {
+                loginLinkMobile.href = 'my-profile.html';
+                loginLinkMobile.innerHTML = `
+                    <img src="${avatarUrl}" alt="Perfil" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-primary);">
+                    Mi Perfil
+                `;
+            }
         }
     }
+    
+    updateNavState();
 });
