@@ -1,7 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Verify Authentication
-    const userPlan = localStorage.getItem('wc_user_plan');
-    if (!userPlan) {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Verify Authentication Securely
+    let session = null;
+    if (window.supabase) {
+        const { data } = await window.supabase.auth.getSession();
+        session = data?.session;
+    }
+
+    if (!session) {
         window.location.href = 'login.html';
         return;
     }
@@ -16,10 +21,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btn-logout');
 
     // 3. Load Saved Data
-    const savedName = localStorage.getItem('wc_profile_name') || '';
-    const savedPhrase = localStorage.getItem('wc_profile_phrase') || '';
-    const savedNeeds = localStorage.getItem('wc_profile_needs') || '';
+    let savedName = localStorage.getItem('wc_profile_name') || '';
+    let savedPhrase = localStorage.getItem('wc_profile_phrase') || '';
+    let savedNeeds = localStorage.getItem('wc_profile_needs') || '';
     let currentAvatar = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
+
+    if (window.supabase && session) {
+        try {
+            const { data, error } = await window.supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+            
+            if (data) {
+                savedName = data.name || savedName;
+                savedPhrase = data.phrase || savedPhrase;
+                savedNeeds = data.needs || savedNeeds;
+                currentAvatar = data.avatar_url || currentAvatar;
+            }
+        } catch(e) {
+            console.warn("Could not load from profiles table:", e);
+        }
+    }
 
     // Populate fields
     if (savedName) nameInput.value = savedName;
@@ -28,12 +52,36 @@ document.addEventListener('DOMContentLoaded', () => {
     avatarPreview.src = currentAvatar;
 
     // 4. Handle Form Submit (Save)
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        localStorage.setItem('wc_profile_name', nameInput.value);
-        localStorage.setItem('wc_profile_phrase', phraseInput.value);
-        localStorage.setItem('wc_profile_needs', needsInput.value);
+        const newName = nameInput.value;
+        const newPhrase = phraseInput.value;
+        const newNeeds = needsInput.value;
+
+        // Try Supabase first
+        if (window.supabase && session) {
+            try {
+                const { error } = await window.supabase
+                    .from('profiles')
+                    .upsert({
+                        id: session.user.id,
+                        name: newName,
+                        phrase: newPhrase,
+                        needs: newNeeds,
+                        avatar_url: currentAvatar,
+                        updated_at: new Date().toISOString()
+                    });
+                if (error) console.error("Error saving profile to DB:", error);
+            } catch(err) {
+                console.warn("Could not save to profiles table:", err);
+            }
+        }
+
+        // Always save to localStorage as fallback
+        localStorage.setItem('wc_profile_name', newName);
+        localStorage.setItem('wc_profile_phrase', newPhrase);
+        localStorage.setItem('wc_profile_needs', newNeeds);
         localStorage.setItem('wc_profile_image', currentAvatar);
 
         showToast('¡Perfil actualizado con éxito!');
@@ -60,8 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 6. Handle Logout
-    btnLogout.addEventListener('click', () => {
+    btnLogout.addEventListener('click', async () => {
         if(confirm('¿Estás segura de que quieres cerrar sesión?')) {
+            if (window.supabase) {
+                await window.supabase.auth.signOut();
+            }
             localStorage.removeItem('wc_user_plan');
             window.location.href = 'index.html';
         }

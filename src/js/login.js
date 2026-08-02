@@ -3,27 +3,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginBtn = document.getElementById('login-btn');
 
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Simular estado de carga
+            const emailInput = document.getElementById('login-email');
+            const passInput = document.getElementById('login-password');
+
+            if (!emailInput || !passInput) return;
+
             loginBtn.classList.add('btn-loading');
             loginBtn.disabled = true;
 
-            // Simular petición a la base de datos
-            setTimeout(() => {
-                // Verificar si hay datos de registro previos en localStorage (opcional)
-                const hasAnswers = localStorage.getItem('vip_onboarding_answers');
-                
-                // Si el usuario no tiene plan, asignarle 'free' como predeterminado
-                if (!localStorage.getItem('wc_user_plan')) {
-                    localStorage.setItem('wc_user_plan', 'free');
-                }
+            try {
+                if (window.supabase) {
+                    const { data, error } = await window.supabase.auth.signInWithPassword({
+                        email: emailInput.value,
+                        password: passInput.value
+                    });
 
-                // Quitar el estado de carga y redirigir
+                    if (error) {
+                        alert("Credenciales incorrectas: " + error.message);
+                        loginBtn.classList.remove('btn-loading');
+                        loginBtn.disabled = false;
+                        return;
+                    }
+
+                    // Successful login
+                    if (!localStorage.getItem('wc_user_plan')) {
+                        localStorage.setItem('wc_user_plan', 'free');
+                    }
+                    window.location.href = 'my-profile.html';
+                } else {
+                    alert("Error: Supabase no está configurado.");
+                    loginBtn.classList.remove('btn-loading');
+                    loginBtn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Login error", err);
+                alert("Ocurrió un error inesperado.");
                 loginBtn.classList.remove('btn-loading');
-                window.location.href = 'matches.html';
-            }, 1200); // 1.2 segundos de espera simulada
+                loginBtn.disabled = false;
+            }
         });
     }
 });

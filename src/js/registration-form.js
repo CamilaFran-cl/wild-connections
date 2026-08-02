@@ -31,6 +31,22 @@ const FORM_SECTIONS = [
         placeholder: 'Ej: Bogotá, Colombia'
       },
       {
+        id: 'email',
+        label: 'Tu correo electrónico',
+        type: 'email',
+        required: true,
+        placeholder: 'Ej: hola@tumarca.com',
+        help: 'Lo usarás para iniciar sesión.'
+      },
+      {
+        id: 'password',
+        label: 'Crea una contraseña',
+        type: 'password',
+        required: true,
+        placeholder: 'Mínimo 6 caracteres',
+        help: 'Para acceder a tu perfil y conexiones.'
+      },
+      {
         id: 'instagram',
         label: 'Tu Instagram profesional (el que quieres que otras mujeres visiten)',
         type: 'text',
@@ -542,6 +558,14 @@ function renderQuestion(q) {
       html += `<input class="reg-input" type="text" id="field-${q.id}" placeholder="${q.placeholder || ''}" value="${escapeHTML(formData[q.id] || '')}" autocomplete="off">`;
       break;
 
+    case 'email':
+      html += `<input class="reg-input" type="email" id="field-${q.id}" placeholder="${q.placeholder || ''}" value="${escapeHTML(formData[q.id] || '')}" autocomplete="email">`;
+      break;
+
+    case 'password':
+      html += `<input class="reg-input" type="password" id="field-${q.id}" placeholder="${q.placeholder || ''}" value="${escapeHTML(formData[q.id] || '')}" autocomplete="new-password">`;
+      break;
+
     case 'textarea':
       html += `<textarea class="reg-textarea" id="field-${q.id}" placeholder="${q.placeholder || ''}">${escapeHTML(formData[q.id] || '')}</textarea>`;
       break;
@@ -992,6 +1016,30 @@ async function submitForm() {
   btnNext.textContent = 'Enviando...';
   btnNext.classList.add('submitting');
 
+  // 1. Supabase Auth Sign Up
+  if (window.supabase) {
+    try {
+      const { data: authData, error: authError } = await window.supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName
+          }
+        }
+      });
+      if (authError) {
+        console.error("Auth Error:", authError);
+        alert("Hubo un error al registrar tu cuenta: " + authError.message);
+        btnNext.textContent = btnText;
+        btnNext.classList.remove('submitting');
+        return;
+      }
+    } catch(e) {
+      console.warn("Could not sign up via Supabase:", e);
+    }
+  }
+
   // Prepare final data
   const registration = {
     ...formData,
@@ -999,6 +1047,9 @@ async function submitForm() {
     lastUpdated: new Date().toISOString(),
     formComplete: true
   };
+
+  // Remove password before saving to db/local storage
+  delete registration.password;
 
   // Store in localStorage
   try {
@@ -1011,12 +1062,12 @@ async function submitForm() {
     console.error('Error saving registration:', e);
   }
 
-  // Try Supabase if available
+  // Try Supabase Database save if available
   if (window.WCDatabase) {
     try {
       await window.WCDatabase.saveRegistration(registration);
     } catch (e) {
-      console.warn('Supabase save failed, data saved locally:', e);
+      console.warn('Supabase DB save failed, data saved locally:', e);
     }
   }
 
