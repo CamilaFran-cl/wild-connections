@@ -76,4 +76,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mainContent) {
         mainContent.classList.add('page-enter');
     }
+
+    // 7. Check Authentication State (Update Navigation)
+    const userPlan = localStorage.getItem('wc_user_plan');
+    if (userPlan) {
+        // User is logged in
+        const avatarUrl = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
+        
+        // Desktop Navbar
+        const loginLinkDesktop = document.querySelector('.nav-actions a[href="login.html"]');
+        if (loginLinkDesktop) {
+            const profileLink = document.createElement('a');
+            profileLink.href = 'my-profile.html';
+            profileLink.className = 'nav-profile-avatar';
+            profileLink.style.cssText = 'margin-right: 15px; display: inline-block; width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold-primary); vertical-align: middle; cursor: pointer;';
+            profileLink.innerHTML = `<img src="${avatarUrl}" alt="Mi Perfil" style="width: 100%; height: 100%; object-fit: cover;">`;
+            loginLinkDesktop.replaceWith(profileLink);
+        }
+
+        // Mobile Navbar
+        const loginLinkMobile = document.querySelector('.mobile-nav-inner a[href="login.html"]');
+        if (loginLinkMobile) {
+            loginLinkMobile.href = 'my-profile.html';
+            loginLinkMobile.innerHTML = `
+                <img src="${avatarUrl}" alt="Perfil" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-primary);">
+                Mi Perfil
+            `;
+        }
+    }
 });
