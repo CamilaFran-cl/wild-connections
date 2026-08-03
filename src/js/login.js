@@ -22,16 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     if (error) {
-                        alert("Credenciales incorrectas: " + error.message);
+                        alert("Correo electrónico o contraseña incorrectos. Por favor, verifica tus datos e intenta de nuevo.");
                         loginBtn.classList.remove('btn-loading');
                         loginBtn.disabled = false;
                         return;
                     }
 
                     // Successful login
-                    if (!localStorage.getItem('wc_user_plan')) {
-                        localStorage.setItem('wc_user_plan', 'free');
-                    }
+                    // Handle stale localStorage keys so profile fetches the actual plan
+                    localStorage.removeItem('wc_user_plan');
                     window.location.href = 'my-profile.html';
                 } else {
                     alert("Error: Supabase no está configurado.");

@@ -3,14 +3,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     let session = null;
     if (window.supabaseClient) {
         try {
-            const { data } = await window.supabaseClient.auth.getSession();
-            session = data?.session;
+            const authPromise = window.supabaseClient.auth.getSession().then(res => res.data?.session);
+            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 3000));
+            session = await Promise.race([authPromise, timeoutPromise]);
         } catch (err) {
             console.error("Error al obtener sesión:", err);
         }
     }
 
-    if (!session) {
+    if (!session && !localStorage.getItem('wc_user_plan')) {
         window.location.href = 'login.html';
         return;
     }
@@ -115,9 +116,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnLogout.addEventListener('click', async () => {
         if(confirm('¿Estás segura de que quieres cerrar sesión?')) {
             if (window.supabaseClient) {
-                await window.supabaseClient.auth.signOut();
+                try {
+                    const logoutPromise = window.supabaseClient.auth.signOut();
+                    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 2000));
+                    await Promise.race([logoutPromise, timeoutPromise]);
+                } catch (e) {
+                    console.error("Logout error", e);
+                }
             }
-            localStorage.removeItem('wc_user_plan');
+            localStorage.clear();
             window.location.href = 'index.html';
         }
     });

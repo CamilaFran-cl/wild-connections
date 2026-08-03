@@ -81,18 +81,35 @@ document.addEventListener('DOMContentLoaded', () => {
     async function updateNavState() {
         let isAuthenticated = false;
         
-        if (typeof window.checkAuthSession === 'function') {
-            const session = await window.checkAuthSession();
-            isAuthenticated = !!session;
+        try {
+            const authPromise = new Promise(async (resolve) => {
+                if (typeof window.checkAuthSession === 'function') {
+                    const session = await window.checkAuthSession();
+                    resolve(!!session);
+                } else if (window.supabaseClient) {
+                    const { data } = await window.supabaseClient.auth.getSession();
+                    resolve(!!data?.session);
+                } else {
+                    resolve(!!localStorage.getItem('wc_user_plan'));
+                }
+            });
+
+            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 3000));
+            const result = await Promise.race([authPromise, timeoutPromise]);
+            
+            if (result !== null) {
+                isAuthenticated = result;
+            } else {
+                isAuthenticated = !!localStorage.getItem('wc_user_plan');
+            }
+
             if (!isAuthenticated) {
-                // Si Supabase dice que no hay sesión, limpiamos el localStorage obsoleto
                 localStorage.removeItem('wc_user_plan');
             } else if (!localStorage.getItem('wc_user_plan')) {
-                // Sincronizar localStorage si Supabase tiene sesión
                 localStorage.setItem('wc_user_plan', 'free');
             }
-        } else {
-            // Fallback si no está supabase
+        } catch (e) {
+            console.warn("Auth check failed:", e);
             isAuthenticated = !!localStorage.getItem('wc_user_plan');
         }
 

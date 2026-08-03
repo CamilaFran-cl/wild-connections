@@ -1016,10 +1016,12 @@ async function submitForm() {
   btnNext.textContent = 'Enviando...';
   btnNext.classList.add('submitting');
 
+  let userId = null;
+
   // 1. Supabase Auth Sign Up
-  if (window.supabase) {
+  if (window.supabaseClient) {
     try {
-      const { data: authData, error: authError } = await window.supabase.auth.signUp({
+      const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -1035,6 +1037,10 @@ async function submitForm() {
         btnNext.classList.remove('submitting');
         return;
       }
+
+      if (authData && authData.user) {
+        userId = authData.user.id;
+      }
     } catch(e) {
       console.warn("Could not sign up via Supabase:", e);
     }
@@ -1048,8 +1054,31 @@ async function submitForm() {
     formComplete: true
   };
 
+  if (userId) {
+    registration.id = userId;
+  }
+
   // Remove password before saving to db/local storage
   delete registration.password;
+
+  // IMMEDIATELY insert into DB if Supabase is available
+  if (window.supabaseClient) {
+    try {
+      const { error: dbError } = await window.supabaseClient
+        .from('registrations')
+        .upsert(registration);
+        
+      if (dbError) {
+        console.error("DB Error:", dbError);
+        alert("Hubo un error al guardar tu perfil: " + dbError.message);
+        btnNext.textContent = btnText;
+        btnNext.classList.remove('submitting');
+        return;
+      }
+    } catch(e) {
+      console.warn("Error upserting registration:", e);
+    }
+  }
 
   // Store in localStorage
   try {
@@ -1060,15 +1089,6 @@ async function submitForm() {
     localStorage.removeItem('wc_registration_draft');
   } catch (e) {
     console.error('Error saving registration:', e);
-  }
-
-  // Try Supabase Database save if available
-  if (window.WCDatabase) {
-    try {
-      await window.WCDatabase.saveRegistration(registration);
-    } catch (e) {
-      console.warn('Supabase DB save failed, data saved locally:', e);
-    }
   }
 
   // Show confirmation
