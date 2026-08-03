@@ -7,11 +7,11 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // Helper function to check session globally
-async function checkAuthSession() {
+window.checkAuthSession = async function checkAuthSession() {
     const { data, error } = await supabase.auth.getSession();
     if (error) {
         console.error("Error al comprobar sesión:", error);
         return null;
     }
     return data.session;
-}
+};
