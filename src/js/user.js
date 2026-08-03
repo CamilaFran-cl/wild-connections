@@ -9,8 +9,8 @@
 
     function getUserData() {
         return {
-            name: localStorage.getItem('wc_user_name') || DEFAULT_NAME,
-            avatar: localStorage.getItem('wc_user_avatar') || DEFAULT_AVATAR
+            name: localStorage.getItem('wc_user_name') || localStorage.getItem('wc_profile_name') || DEFAULT_NAME,
+            avatar: localStorage.getItem('wc_user_avatar') || localStorage.getItem('wc_profile_image') || DEFAULT_AVATAR
         };
     }
 
