@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && mkdir -p public && cp -r build/* public/ || true",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "repository": {
