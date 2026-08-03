@@ -13,7 +13,7 @@ async function runTest() {
 
   try {
     console.log("Navigating to Login...");
-    await page.goto('http://localhost:3000/login.html', { waitUntil: 'networkidle0' });
+    await page.goto('https://wild-connections.vercel.app/login.html', { waitUntil: 'networkidle0' });
     
     // Take screenshot
     await page.screenshot({ path: 'login_debug.png' });
