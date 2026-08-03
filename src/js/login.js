@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const emailInput = document.getElementById('login-email');
-            const passInput = document.getElementById('login-password');
+            const emailInput = document.getElementById('email');
+            const passInput = document.getElementById('password');
 
             if (!emailInput || !passInput) return;
 
