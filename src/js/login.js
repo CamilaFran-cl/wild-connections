@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
             loginBtn.disabled = true;
 
             try {
-                if (window.supabase) {
-                    const { data, error } = await window.supabase.auth.signInWithPassword({
+                if (window.supabaseClient) {
+                    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
                         email: emailInput.value,
                         password: passInput.value
                     });
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error("Login error", err);
-                alert("Ocurrió un error inesperado.");
+                alert("Error técnico: " + (err.message || JSON.stringify(err)));
                 loginBtn.classList.remove('btn-loading');
                 loginBtn.disabled = false;
             }
