@@ -2,7 +2,7 @@
    WILD CONNECTIONS — Admin Dashboard Logic
    ============================================================ */
 
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     
     // --- 1. Security Lock ---
     const ADMIN_PIN = 'Nanurri123#';

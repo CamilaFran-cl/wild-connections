@@ -33,7 +33,7 @@
 
     // Run on DOM ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', applyUserData);
+        (function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( applyUserData);
     } else {
         applyUserData();
     }

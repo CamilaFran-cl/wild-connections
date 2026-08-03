@@ -1,6 +1,6 @@
 import { supabase, checkAuthSession } from './supabase-client.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( async () => {
     // 1. Verify Authentication Securely
     let session = null;
     if (supabase) {

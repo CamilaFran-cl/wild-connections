@@ -46,7 +46,7 @@ const questions = [
 let currentStep = 0;
 let answers = {};
 
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     // Check local storage for previous progress
     const savedStep = localStorage.getItem('vip_onboarding_step');
     const savedAnswers = localStorage.getItem('vip_onboarding_answers');

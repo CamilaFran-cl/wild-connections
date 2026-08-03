@@ -1,6 +1,6 @@
 import { supabase, checkAuthSession } from './supabase-client.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     const loginForm = document.getElementById('login-form');
     const loginBtn = document.getElementById('login-btn');
 

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     // 1. Get mentor ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const mentorId = parseInt(urlParams.get('id'));

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     const applyForm = document.getElementById('applyForm');
     const heroCta = document.getElementById('heroCta');
 

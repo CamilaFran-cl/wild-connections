@@ -2,7 +2,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
 
 'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     // 1. Navbar scroll effect
     const navbar = document.querySelector('.navbar');
     if (navbar) {

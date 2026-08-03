@@ -319,7 +319,7 @@ function initMatches() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initMatches);
+  (function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( initMatches);
 } else {
   initMatches();
 }

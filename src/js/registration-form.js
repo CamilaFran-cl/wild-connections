@@ -438,7 +438,7 @@ const autosaveIndicator = document.getElementById('autosave-indicator');
 const confirmationScreen = document.getElementById('confirmation-screen');
 
 // ── Initialize ─────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
   loadDraft();
   renderProgressBar();
   renderSection(currentSectionIndex);

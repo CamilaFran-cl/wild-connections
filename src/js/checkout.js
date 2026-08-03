@@ -16,7 +16,7 @@ const planesInfo = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     // 1. Read plan from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     let planId = urlParams.get('plan') || 'anual';

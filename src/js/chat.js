@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     // 1. Initial Data and Setup
     const allowedChatIds = [1, 3]; // Valentina and Isabella
     const storageKey = 'wc_chat_messages';

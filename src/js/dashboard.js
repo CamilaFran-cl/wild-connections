@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
     // Add event listeners to all .btn-coffee buttons in the dashboard
     const coffeeButtons = document.querySelectorAll('.btn-coffee');
     
