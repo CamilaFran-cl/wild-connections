@@ -1,9 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Verify Authentication Securely
     let session = null;
-    if (window.supabase) {
-        const { data } = await window.supabase.auth.getSession();
-        session = data?.session;
+    if (window.supabaseClient) {
+        try {
+            const { data } = await window.supabaseClient.auth.getSession();
+            session = data?.session;
+        } catch (err) {
+            console.error("Error al obtener sesión:", err);
+        }
     }
 
     if (!session) {
@@ -26,9 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let savedNeeds = localStorage.getItem('wc_profile_needs') || '';
     let currentAvatar = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
 
-    if (window.supabase && session) {
+    if (window.supabaseClient && session) {
         try {
-            const { data, error } = await window.supabase
+            const { data, error } = await window.supabaseClient
                 .from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
@@ -60,9 +64,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const newNeeds = needsInput.value;
 
         // Try Supabase first
-        if (window.supabase && session) {
+        if (window.supabaseClient && session) {
             try {
-                const { error } = await window.supabase
+                const { error } = await window.supabaseClient
                     .from('profiles')
                     .upsert({
                         id: session.user.id,
@@ -110,8 +114,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 6. Handle Logout
     btnLogout.addEventListener('click', async () => {
         if(confirm('¿Estás segura de que quieres cerrar sesión?')) {
-            if (window.supabase) {
-                await window.supabase.auth.signOut();
+            if (window.supabaseClient) {
+                await window.supabaseClient.auth.signOut();
             }
             localStorage.removeItem('wc_user_plan');
             window.location.href = 'index.html';
