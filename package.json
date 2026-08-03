@@ -1,0 +1,35 @@
+{
+  "name": "mentoras-vip",
+  "version": "1.0.0",
+  "description": "Las mentoras y emprendedoras carecen de una red de conexión inteligente para encontrar pares afines por país y etapa de escalamiento de sus proyectos.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CamilaFran-cl/wild-connections.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/CamilaFran-cl/wild-connections/issues"
+  },
+  "homepage": "https://github.com/CamilaFran-cl/wild-connections#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.111.0",
+    "dotenv": "^17.4.2",
+    "vite": "^8.2.0"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.4.0",
+    "serve": "^14.2.6"
+  }
+}

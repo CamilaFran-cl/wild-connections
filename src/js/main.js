@@ -1,3 +1,5 @@
+import { supabase, checkAuthSession } from './supabase-client.js';
+
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -83,11 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             const authPromise = new Promise(async (resolve) => {
-                if (typeof window.checkAuthSession === 'function') {
-                    const session = await window.checkAuthSession();
+                if (typeof checkAuthSession === 'function') {
+                    const session = await checkAuthSession();
                     resolve(!!session);
-                } else if (window.supabaseClient) {
-                    const { data } = await window.supabaseClient.auth.getSession();
+                } else if (supabase) {
+                    const { data } = await supabase.auth.getSession();
                     resolve(!!data?.session);
                 } else {
                     resolve(!!localStorage.getItem('wc_user_plan'));

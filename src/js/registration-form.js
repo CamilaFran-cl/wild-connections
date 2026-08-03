@@ -1,3 +1,5 @@
+import { supabase, checkAuthSession } from './supabase-client.js';
+
 /* ============================================================
    WILD CONNECTIONS — Registration Form Engine
    27 questions / 9 sections with auto-save, skip logic,
@@ -1019,9 +1021,9 @@ async function submitForm() {
   let userId = null;
 
   // 1. Supabase Auth Sign Up
-  if (window.supabaseClient) {
+  if (supabase) {
     try {
-      const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -1062,9 +1064,9 @@ async function submitForm() {
   delete registration.password;
 
   // IMMEDIATELY insert into DB if Supabase is available
-  if (window.supabaseClient) {
+  if (supabase) {
     try {
-      const { error: dbError } = await window.supabaseClient
+      const { error: dbError } = await supabase
         .from('registrations')
         .upsert(registration);
         

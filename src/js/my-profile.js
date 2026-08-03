@@ -1,9 +1,11 @@
+import { supabase, checkAuthSession } from './supabase-client.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Verify Authentication Securely
     let session = null;
-    if (window.supabaseClient) {
+    if (supabase) {
         try {
-            const authPromise = window.supabaseClient.auth.getSession().then(res => res.data?.session);
+            const authPromise = supabase.auth.getSession().then(res => res.data?.session);
             const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 3000));
             session = await Promise.race([authPromise, timeoutPromise]);
         } catch (err) {
@@ -31,9 +33,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let savedNeeds = localStorage.getItem('wc_profile_needs') || '';
     let currentAvatar = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
 
-    if (window.supabaseClient && session) {
+    if (supabase && session) {
         try {
-            const { data, error } = await window.supabaseClient
+            const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
@@ -65,9 +67,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const newNeeds = needsInput.value;
 
         // Try Supabase first
-        if (window.supabaseClient && session) {
+        if (supabase && session) {
             try {
-                const { error } = await window.supabaseClient
+                const { error } = await supabase
                     .from('profiles')
                     .upsert({
                         id: session.user.id,
@@ -115,9 +117,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 6. Handle Logout
     btnLogout.addEventListener('click', async () => {
         if(confirm('¿Estás segura de que quieres cerrar sesión?')) {
-            if (window.supabaseClient) {
+            if (supabase) {
                 try {
-                    const logoutPromise = window.supabaseClient.auth.signOut();
+                    const logoutPromise = supabase.auth.signOut();
                     const timeoutPromise = new Promise(resolve => setTimeout(resolve, 2000));
                     await Promise.race([logoutPromise, timeoutPromise]);
                 } catch (e) {

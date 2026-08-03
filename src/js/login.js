@@ -1,3 +1,5 @@
+import { supabase, checkAuthSession } from './supabase-client.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const loginBtn = document.getElementById('login-btn');
@@ -15,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
             loginBtn.disabled = true;
 
             try {
-                if (window.supabaseClient) {
-                    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+                if (supabase) {
+                    const { data, error } = await supabase.auth.signInWithPassword({
                         email: emailInput.value,
                         password: passInput.value
                     });

@@ -1,16 +1,4 @@
-# deps
 node_modules/
-.pnp/
-# next
-.next/
-out/
-build/
-# env — NUNCA commitear
+dist/
 .env
-.env*.local
-# vercel / supabase
-.vercel
-.supabase/
-# os
-.DS_Store
-*.log
+.env.local
