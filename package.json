@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && ls -la && ls -la dist",
+    "build": "vite build && ls -la build",
     "preview": "vite preview"
   },
   "repository": {

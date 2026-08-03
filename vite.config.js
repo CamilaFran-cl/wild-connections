@@ -5,7 +5,7 @@ export default defineConfig({
   root: 'src',
   envDir: __dirname,
   build: {
-    outDir: resolve(__dirname, 'dist'),
+    outDir: resolve(__dirname, 'build'),
     emptyOutDir: true,
     rollupOptions: {
       input: {
