@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ser Mentora - Wild Connections</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    
+    <style>
+        .hero-apply {
+            position: relative;
+            padding: calc(80px + var(--space-12)) 0 var(--space-12);
+            text-align: center;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.1) 0%, transparent 60%);
+        }
+        
+        .hero-apply::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.15) 0%, transparent 5%),
+                radial-gradient(circle at 80% 60%, rgba(212, 175, 55, 0.1) 0%, transparent 4%),
+                radial-gradient(circle at 40% 80%, rgba(212, 175, 55, 0.15) 0%, transparent 6%);
+            z-index: -1;
+            animation: pulse-glow 8s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .timeline-section {
+            padding: var(--space-8) 0;
+            position: relative;
+        }
+
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, var(--gold-primary), transparent);
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: var(--space-4);
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .timeline-dot {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-surface);
+            border: 2px solid var(--gold-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            color: var(--gold-primary);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            z-index: 1;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .timeline-content {
+            padding-top: 10px;
+        }
+
+        .apply-form-section {
+            padding: var(--space-8) 0;
+        }
+
+        .form-group {
+            margin-bottom: var(--space-4);
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--space-2);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--space-3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23D4AF37%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem top 50%;
+            background-size: 0.65rem auto;
+        }
+
+        select.form-control option {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/apply-lZqZtSMW.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/base-O9JB4yno.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-client-Dy-joStn.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DCaF-Q2e.js">
+  <link rel="stylesheet" crossorigin href="/assets/base-DypqIVbn.css">
+  <link rel="stylesheet" crossorigin href="/assets/main-CZ83bfr9.css">
+  <link rel="stylesheet" crossorigin href="/assets/components-dMdzBmVr.css">
+  <link rel="stylesheet" crossorigin href="/assets/pages-D3LH2p5s.css">
+</head>
+<body class="theme-dark">
+
+    <!-- Navbar Pública -->
+    <nav class="navbar">
+        <div class="container navbar-inner">
+            <a href="index.html" class="nav-brand nav-logo"><img src="/assets/logo-principal-blanco-ByDQfMDA.png" alt="Wild Connections" class="nav-logo-img" style="height:28px"></a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="matches.html" class="nav-link">Mentoras</a>
+                <a href="pricing.html" class="nav-link">Planes</a>
+                <a href="nosotras.html" class="nav-link">Nosotras</a>
+            </div>
+            <div class="nav-actions">
+                <a href="login.html" class="nav-link" style="margin-right: 15px; font-size: 0.9rem; font-weight: 600;">Ingresar</a>
+                <a href="pricing.html" class="btn btn-gold btn-sm">Ver Planes</a>
+                <button class="nav-toggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-apply">
+        <div class="container">
+            <h1 class="animate-fadeInUp text-gold" style="font-size: 3.5rem; margin-bottom: var(--space-4);">Inspira. Conecta. Transforma.</h1>
+            <p class="animate-fadeInUp delay-1 text-secondary" style="font-size: 1.2rem; max-width: 600px; margin: 0 auto var(--space-6);">
+                Únete a la red de mentoras más exclusiva de habla hispana y comparte tu experiencia con emprendedoras que necesitan de tu guía.
+            </p>
+            <a href="#postulacion" class="btn btn-gold btn-lg shimmer-effect animate-fadeInUp delay-2" id="heroCta">Postúlate como Mentora</a>
+        </div>
+    </section>
+
+    <!-- Beneficios Section -->
+    <section class="container" style="padding: var(--space-6) 0;">
+        <h2 class="text-center" style="margin-bottom: var(--space-6);">Por qué ser parte de <span class="text-gold">Wild Connections</span></h2>
+        <div class="grid-3">
+            <div class="card glass-panel hover-lift text-center reveal">
+                <div class="icon-box" style="margin: 0 auto var(--space-4); color: var(--gold-primary);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+                <h3>Ingresos Recurrentes</h3>
+                <p class="text-secondary text-sm" style="margin-top: var(--space-2);">Genera ingresos pasivos compartiendo tu experiencia a través de sesiones y talleres exclusivos.</p>
+            </div>
+            <div class="card glass-panel hover-lift text-center reveal delay-1">
+                <div class="icon-box" style="margin: 0 auto var(--space-4); color: var(--gold-primary);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <h3>Red Exclusiva</h3>
+                <p class="text-secondary text-sm" style="margin-top: var(--space-2);">Conecta con otras mujeres líderes y expande tu círculo profesional de alto nivel.</p>
+            </div>
+            <div class="card glass-panel hover-lift text-center reveal delay-2">
+                <div class="icon-box" style="margin: 0 auto var(--space-4); color: var(--gold-primary);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <h3>Visibilidad de Marca</h3>
+                <p class="text-secondary text-sm" style="margin-top: var(--space-2);">Posiciónate como referente en tu industria con tu perfil verificado VIP.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ¿Cómo Funciona? Section -->
+    <section class="timeline-section reveal">
+        <div class="container">
+            <h2 class="text-center" style="margin-bottom: var(--space-6);">Tu Camino al <span class="text-gold">Éxito</span></h2>
+            <div class="timeline-container">
+                <div class="timeline-item">
+                    <div class="timeline-dot">1</div>
+                    <div class="timeline-content">
+                        <h3>Postúlate</h3>
+                        <p class="text-secondary">Completa el formulario con tu experiencia y especialidad.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">2</div>
+                    <div class="timeline-content">
+                        <h3>Verificación</h3>
+                        <p class="text-secondary">Nuestro equipo revisa tu perfil y te contacta en 48 horas.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">3</div>
+                    <div class="timeline-content">
+                        <h3>Comienza a Mentorar</h3>
+                        <p class="text-secondary">Configura tus servicios, horarios y empieza a impactar.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonios Section -->
+    <section class="container reveal" style="padding: var(--space-6) 0;">
+        <h2 class="text-center" style="margin-bottom: var(--space-6);">Ellas ya son <span class="text-gold">Mentoras</span></h2>
+        <div class="grid-2" style="max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-4);">
+            <div class="card glass-panel hover-lift">
+                <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                    <img src="/assets/mentor-valentina-Ckg0hrmQ.jpg" alt="Valentina Tanono" class="avatar avatar-lg avatar-gold" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjYyNjMwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI0MCIgZmlsbD0iI0UyRThGMCIgZHk9Ii4zZW0iIHRleHQtYW5jaG9yPSJtaWRkbGUiPlZUPC90ZXh0Pjwvc3ZnPg=='">
+                    <div>
+                        <h4 style="margin: 0;">Valentina Tanono</h4>
+                        <span class="text-secondary text-sm">Escalamiento Financiero</span>
+                    </div>
+                </div>
+                <p class="text-secondary italic">"Wild Connections me permitió escalar mis sesiones de coaching a un nivel que no imaginé. La red es increíble."</p>
+            </div>
+            <div class="card glass-panel hover-lift">
+                <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+                    <img src="/assets/mentor-isabella-C_iJqluL.jpg" alt="Isabella Reyes" class="avatar avatar-lg avatar-gold" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjYyNjMwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI0MCIgZmlsbD0iI0UyRThGMCIgZHk9Ii4zZW0iIHRleHQtYW5jaG9yPSJtaWRkbGUiPklSPC90ZXh0Pjwvc3ZnPg=='">
+                    <div>
+                        <h4 style="margin: 0;">Isabella Reyes</h4>
+                        <span class="text-secondary text-sm">Bienestar y Salud</span>
+                    </div>
+                </div>
+                <p class="text-secondary italic">"Encontré un espacio donde mi pasión por el bienestar se conecta directamente con emprendedoras que lo necesitan."</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formulario de Postulación Section -->
+    <section id="postulacion" class="apply-form-section reveal">
+        <div class="container" style="max-width: 600px;">
+            <div class="card glass-panel hover-lift-glow">
+                <h2 class="text-center" style="margin-bottom: var(--space-4);">Postúlate como Mentora</h2>
+                <form id="applyForm">
+                    <div class="form-group">
+                        <label for="fullName" class="form-label">Nombre Completo *</label>
+                        <input type="text" id="fullName" class="form-control" required placeholder="Ej: Laura Méndez">
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Correo Electrónico *</label>
+                        <input type="email" id="email" class="form-control" required placeholder="tu@correo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="specialty" class="form-label">Especialidad *</label>
+                        <select id="specialty" class="form-control" required>
+                            <option value="">Selecciona tu especialidad...</option>
+                            <option value="Escalamiento Financiero">Escalamiento Financiero</option>
+                            <option value="Marketing Digital">Marketing Digital</option>
+                            <option value="Desarrollo Personal">Desarrollo Personal</option>
+                            <option value="Tecnología">Tecnología</option>
+                            <option value="E-commerce">E-commerce</option>
+                            <option value="Bienestar y Salud">Bienestar y Salud</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin" class="form-label">URL de LinkedIn (Opcional)</label>
+                        <input type="url" id="linkedin" class="form-control" placeholder="https://linkedin.com/in/tu-perfil">
+                    </div>
+                    <div class="form-group">
+                        <label for="experience" class="form-label">Breve descripción de tu experiencia *</label>
+                        <textarea id="experience" class="form-control" rows="4" required placeholder="Cuéntanos un poco sobre tu trayectoria y por qué quieres ser mentora..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-gold btn-lg shimmer-effect" style="width: 100%; justify-content: center; margin-top: var(--space-4);">Enviar Postulación</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="border-top: 1px solid var(--border); padding: var(--space-6) 0; margin-top: var(--space-8); text-align: center;">
+        <div class="container">
+            <h3 class="nav-brand" style="margin-bottom: var(--space-2);"><img src="/assets/logo-secundario-crema-CjsE2UBe.png" alt="Wild Connections" style="height:24px"></h3>
+            <p class="text-secondary text-sm" style="margin-bottom: var(--space-4);">Transformando el liderazgo femenino.</p>
+            <div style="display: flex; gap: var(--space-4); justify-content: center; margin-bottom: var(--space-4);">
+                <a href="index.html" class="text-secondary" style="text-decoration: none;">Inicio</a>
+                <a href="nosotras.html" class="text-secondary" style="text-decoration: none;">Nosotras</a>
+                <a href="pricing.html" class="text-secondary" style="text-decoration: none;">Planes</a>
+            </div>
+            <p class="text-secondary text-sm">&copy; 2025 Wild Goddess Magazine®. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

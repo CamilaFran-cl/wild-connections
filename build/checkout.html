@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Wild Connections</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+
+    <style>
+        .checkout-container {
+            padding: calc(80px + var(--space-8)) 0 var(--space-8);
+            min-height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .checkout-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+        }
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-8);
+            align-items: start;
+        }
+        @media (max-width: 768px) {
+            .checkout-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        .checkout-summary, .checkout-payment {
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            background: rgba(17, 17, 22, 0.7);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-6);
+        }
+        .plan-title {
+            font-family: 'Cinzel', serif;
+            font-size: var(--text-2xl);
+            color: var(--text-primary);
+            margin: 0 0 var(--space-2) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+        .summary-price {
+            font-size: var(--text-3xl);
+            font-family: 'Cinzel', serif;
+            color: var(--gold-primary);
+            margin: 0;
+        }
+        .summary-period {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .summary-benefits {
+            list-style: none;
+            margin: var(--space-6) 0;
+            padding: 0;
+        }
+        .summary-benefits li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            margin-bottom: var(--space-3);
+            color: var(--text-primary);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+        }
+        .summary-benefits .icon-check {
+            color: var(--gold-primary);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .gold-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+            margin: var(--space-6) 0;
+            opacity: 0.3;
+        }
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--text-xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .checkout-payment h2 {
+            font-family: 'Cinzel', serif;
+            font-size: var(--text-2xl);
+            color: var(--text-primary);
+            margin-top: 0;
+            margin-bottom: var(--space-6);
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+        .form-label {
+            display: block;
+            margin-bottom: var(--space-2);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: var(--text-sm);
+        }
+        .form-input-glass {
+            width: 100%;
+            padding: var(--space-3);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .form-input-glass:focus {
+            border-color: var(--gold-primary);
+            outline: none;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 1px var(--gold-primary);
+        }
+        .form-input-glass::placeholder {
+            color: rgba(148, 163, 184, 0.5);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+        }
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            margin: var(--space-6) 0;
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            cursor: pointer;
+        }
+        .terms-checkbox input {
+            margin-top: 4px;
+            cursor: pointer;
+            accent-color: var(--gold-primary);
+        }
+        .terms-checkbox a {
+            color: var(--gold-primary);
+            text-decoration: none;
+        }
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Success Overlay */
+        .success-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(8, 8, 10, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .success-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .pulsing-star {
+            font-size: 80px;
+            color: var(--gold-primary);
+            animation: pulse-star 1.5s infinite alternate ease-in-out;
+            margin-bottom: var(--space-6);
+        }
+        @keyframes pulse-star {
+            0% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4)); }
+            100% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.8)); }
+        }
+        .success-title {
+            font-family: 'Cinzel', serif;
+            font-size: var(--text-4xl);
+            color: var(--text-primary);
+            margin-bottom: var(--space-3);
+            text-align: center;
+        }
+        .success-subtitle {
+            color: var(--text-secondary);
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-8);
+            text-align: center;
+        }
+        .loading-dots {
+            display: flex;
+            gap: 12px;
+        }
+        .loading-dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gold-primary);
+            animation: bounce 0.6s infinite alternate;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            to { transform: translateY(-12px); opacity: 0.5; }
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/checkout-rY5aXCHh.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/base-O9JB4yno.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-client-Dy-joStn.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DCaF-Q2e.js">
+  <link rel="stylesheet" crossorigin href="/assets/base-DypqIVbn.css">
+  <link rel="stylesheet" crossorigin href="/assets/main-CZ83bfr9.css">
+  <link rel="stylesheet" crossorigin href="/assets/components-dMdzBmVr.css">
+  <link rel="stylesheet" crossorigin href="/assets/pages-D3LH2p5s.css">
+</head>
+<body class="theme-dark">
+    <!-- Navbar (Public) -->
+    <nav class="navbar">
+        <div class="container navbar-inner">
+            <a href="index.html" class="nav-brand nav-logo"><img src="/assets/logo-principal-blanco-ByDQfMDA.png" alt="Wild Connections" class="nav-logo-img" style="height:28px"></a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="matches.html" class="nav-link">Mentoras</a>
+                <a href="pricing.html" class="nav-link">Planes</a>
+                <a href="nosotras.html" class="nav-link">Nosotras</a>
+            </div>
+            <div class="nav-actions">
+                <a href="login.html" class="nav-link" style="margin-right: 15px; font-size: 0.9rem; font-weight: 600;">Ingresar</a>
+                <a href="pricing.html" class="btn btn-gold btn-sm">Ver Planes</a>
+                <button class="nav-toggle" aria-label="Abrir menú"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container checkout-container animate-fadeInUp">
+        <div class="checkout-header">
+            <h1 class="text-gold">Completar Suscripción</h1>
+            <p class="text-secondary">Estás a un paso de unirte a nuestra exclusiva comunidad</p>
+        </div>
+
+        <div class="checkout-layout">
+            <!-- Left Column: Order Summary -->
+            <div class="checkout-summary glass-panel reveal delay-1">
+                <div class="summary-header">
+                    <div>
+                        <h3 id="plan-name" class="plan-title">
+                            Plan Activo
+                            <span class="badge badge-vip">ACTIVO</span>
+                        </h3>
+                    </div>
+                    <div style="text-align: right;">
+                        <p class="summary-price" id="plan-price">$0</p>
+                        <p class="summary-period" id="plan-period">/mes</p>
+                    </div>
+                </div>
+
+                <ul class="summary-benefits" id="plan-benefits">
+                    <!-- Populated dynamically by JS -->
+                </ul>
+
+                <div class="gold-divider"></div>
+
+                <div class="summary-total">
+                    <span>Total a Pagar</span>
+                    <span id="plan-total" class="text-gold">$0.00</span>
+                </div>
+            </div>
+
+            <!-- Right Column: Payment Form -->
+            <div class="checkout-payment glass-panel reveal delay-2">
+                <h2>Datos de Pago</h2>
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label for="card-name" class="form-label">Nombre en la Tarjeta</label>
+                        <input type="text" id="card-name" class="form-input form-input-glass" placeholder="Ej. Ana García" required autocomplete="cc-name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="card-number" class="form-label">Número de Tarjeta</label>
+                        <input type="text" id="card-number" class="form-input form-input-glass" placeholder="0000 0000 0000 0000" required autocomplete="cc-number">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expiry-date" class="form-label">Fecha de Vencimiento</label>
+                            <input type="text" id="expiry-date" class="form-input form-input-glass" placeholder="MM/YY" required autocomplete="cc-exp">
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv" class="form-label">CVV</label>
+                            <input type="password" id="cvv" class="form-input form-input-glass" placeholder="***" required autocomplete="cc-csc">
+                        </div>
+                    </div>
+                    
+                    <label class="terms-checkbox">
+                        <input type="checkbox" id="terms" required>
+                        <span>Acepto los <a href="#">términos y condiciones</a> y la política de privacidad.</span>
+                    </label>
+                    
+                    <button type="submit" class="btn btn-gold btn-lg shimmer-effect" style="width: 100%;">
+                        Confirmar Pago 🔒
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Overlay -->
+    <div id="success-overlay" class="success-overlay">
+        <div class="pulsing-star">✦</div>
+        <h2 class="success-title">¡Bienvenida a Wild Connections!</h2>
+        <p class="success-subtitle">Tu suscripción ha sido activada exitosamente.</p>
+        <div class="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+</body>
+</html>

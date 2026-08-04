@@ -18,6 +18,8 @@ export default defineConfig({
         conexiones: resolve(__dirname, 'src/conexiones.html'),
         dashboard: resolve(__dirname, 'src/dashboard.html'),
         login: resolve(__dirname, 'src/login.html'),
+        forgot_password: resolve(__dirname, 'src/forgot-password.html'),
+        update_password: resolve(__dirname, 'src/update-password.html'),
         matches: resolve(__dirname, 'src/matches.html'),
         my_profile: resolve(__dirname, 'src/my-profile.html'),
         nosotras: resolve(__dirname, 'src/nosotras.html'),
