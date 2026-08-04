@@ -1154,3 +1154,7 @@ function escapeHTML(str) {
 const shakeStyle = document.createElement('style');
 shakeStyle.textContent = `@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }`;
 document.head.appendChild(shakeStyle);
+
+// Make startForm globally available since we are in a module
+window.startForm = startForm;
+
