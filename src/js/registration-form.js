@@ -1051,17 +1051,19 @@ async function submitForm() {
   // Prepare final data
   const registration = {
     ...formData,
+    full_name: formData.fullName, // Map for Supabase column
     registeredAt: new Date().toISOString(),
     lastUpdated: new Date().toISOString(),
     formComplete: true
   };
 
+  // Remove duplicate/unwanted fields before saving to DB
+  delete registration.fullName;
+  delete registration.password;
+
   if (userId) {
     registration.id = userId;
   }
-
-  // Remove password before saving to db/local storage
-  delete registration.password;
 
   // IMMEDIATELY insert into DB if Supabase is available
   if (supabase) {
