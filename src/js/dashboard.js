@@ -26,4 +26,38 @@
             }, 3000);
         });
     });
+
+    // Tab Logic for Mis Cafes Virtuales
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => {
+                b.classList.remove('active');
+                b.style.color = 'var(--text-secondary)';
+                b.style.borderBottom = 'none';
+                b.style.fontWeight = 'normal';
+            });
+            tabContents.forEach(c => {
+                c.style.display = 'none';
+                c.classList.remove('active');
+            });
+
+            // Add active class to clicked
+            btn.classList.add('active');
+            btn.style.color = 'var(--gold-primary)';
+            btn.style.borderBottom = '2px solid var(--gold-primary)';
+            btn.style.fontWeight = '600';
+            
+            const target = document.getElementById('tab-' + btn.getAttribute('data-tab'));
+            if (target) {
+                target.style.display = 'block';
+                // Trigger reflow for transition
+                void target.offsetWidth;
+                target.classList.add('active');
+            }
+        });
+    });
 });
