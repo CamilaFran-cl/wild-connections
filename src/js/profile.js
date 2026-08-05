@@ -1,16 +1,35 @@
-(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
-    // Get the ID from the URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const mentorIdStr = urlParams.get('id');
+import { supabase } from './supabase-client.js';
 
-    let mentorId = 1;
-    if (mentorIdStr && !isNaN(parseInt(mentorIdStr))) {
-        mentorId = parseInt(mentorIdStr);
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( async () => {
+    // Get the UUID from the URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const mentorId = urlParams.get('id');
+
+    if (!mentorId) {
+        window.location.href = 'matches.html';
+        return;
     }
 
-    let mentor = mentors.find(m => m.id === mentorId);
+    // Load mentor profile from Supabase
+    let mentor = null;
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('registrations')
+                .select('*')
+                .eq('id', mentorId)
+                .single();
+            if (!error && data) {
+                mentor = data;
+            }
+        } catch(e) {
+            console.warn("Could not load profile:", e);
+        }
+    }
+
     if (!mentor) {
-        mentor = mentors[0];
+        window.location.href = 'matches.html';
+        return;
     }
 
     // Target elements
@@ -21,7 +40,7 @@
     const tagsEl = document.getElementById('dynamic-tags');
     const detailsEl = document.getElementById('dynamic-details');
 
-    if (nameEl) nameEl.textContent = mentor.name;
+    if (nameEl) nameEl.textContent = mentor.fullName || 'Mentora';
 
     if (metaEl) {
         let metaHtml = '';
@@ -34,16 +53,17 @@
     }
 
     if (bioEl) {
-        bioEl.textContent = mentor.bio || `Especialista en ${mentor.specialty}. Lista para ayudarte a escalar tu negocio y alcanzar tus objetivos.`;
+        bioEl.textContent = mentor.bio || mentor.microphonePitch || `Especialista en ${mentor.expertise || 'emprendimiento'}. Lista para ayudarte a escalar tu negocio.`;
     }
 
     if (avatarEl) {
-        avatarEl.src = mentor.image;
-        avatarEl.alt = mentor.name;
+        avatarEl.src = mentor.profilePhoto || 'assets/mentor-isabella.jpg';
+        avatarEl.alt = mentor.fullName || 'Mentora';
     }
 
     if (tagsEl) {
-        tagsEl.innerHTML = (mentor.tags || []).map(tag => `<span class="badge-tag">${tag}</span>`).join('');
+        const tags = Array.isArray(mentor.painPoints) ? mentor.painPoints : [];
+        tagsEl.innerHTML = tags.map(tag => `<span class="badge-tag">${tag}</span>`).join('');
     }
 
     if (detailsEl) {
@@ -58,7 +78,7 @@
 
         if (mentor.microphonePitch) {
             detailsHtml += `<div>
-                <h4 style="color: var(--gold-primary); font-family: var(--font-display); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: var(--space-1);">🎙️ Pitch en el Micrófono (Lo que busca)</h4>
+                <h4 style="color: var(--gold-primary); font-family: var(--font-display); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: var(--space-1);">🎙️ Pitch en el Micrófono</h4>
                 <p style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic; background: rgba(212, 197, 160, 0.05); padding: var(--space-3); border-radius: var(--radius-sm); border-left: 2px solid var(--gold-primary);">"${mentor.microphonePitch}"</p>
             </div>`;
         }
@@ -88,8 +108,9 @@
         detailsEl.innerHTML = detailsHtml;
     }
 
-    document.title = `${mentor.name} — Wild Connections`;
+    document.title = `${mentor.fullName || 'Perfil'} — Wild Connections`;
 
+    // Update booking buttons to link to the real booking page
     const bookBtns = document.querySelectorAll('.btn-book');
     bookBtns.forEach(btn => {
         btn.href = `booking.html?id=${mentor.id}`;
