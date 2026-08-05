@@ -24,7 +24,11 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                     });
 
                     if (error) {
-                        alert("Correo electrónico o contraseña incorrectos. Por favor, verifica tus datos e intenta de nuevo.");
+                        let errorMsg = "Correo electrónico o contraseña incorrectos. Por favor, verifica tus datos e intenta de nuevo.";
+                        if (error.message.includes("Email not confirmed")) {
+                            errorMsg = "Por favor, verifica tu correo electrónico haciendo clic en el enlace que te enviamos antes de iniciar sesión.";
+                        }
+                        alert(errorMsg);
                         loginBtn.classList.remove('btn-loading');
                         loginBtn.disabled = false;
                         return;
