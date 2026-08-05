@@ -30,7 +30,7 @@
 }
 
 .reg-header .nav-logo-img {
-    height: 24px;
+    height: 60px;
     opacity: 0.9;
 }
 
@@ -722,7 +722,7 @@
 }
 
 .reg-cover .cover-logo {
-    height: 40px;
+    height: 60px;
     margin-bottom: var(--space-6);
     opacity: 0.9;
 }

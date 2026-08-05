@@ -522,7 +522,7 @@ function renderSection(index) {
 function renderCover() {
   return `
     <div class="reg-cover">
-      <img src="assets/logos/logo-principal-blanco.png" alt="Wild Goddess Magazine" class="cover-logo">
+      <img src="/assets/logos/logo-principal-blanco.png" alt="Wild Goddess Magazine" class="cover-logo">
       <h1 class="cover-title">Tu lugar en el espacio de Networking</h1>
       <p class="cover-subtitle">
         Responde estas preguntas para que podamos conectarte con las mujeres ideales para ti — 

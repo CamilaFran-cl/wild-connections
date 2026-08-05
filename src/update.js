@@ -4,7 +4,7 @@ const path = require('path');
 const baseDir = 'c:/Users/NANO/Documents/mentorasVip/mentoras-vip/mentoras-vip/src';
 
 const htmlReplacements = [
-    { from: /Mentoras <span class="gold">VIP<\/span>/g, to: '<img src="assets/logos/logo-principal-blanco.png" alt="Wild Connections" class="nav-logo-img" style="height:28px">' },
+    { from: /Mentoras <span class="gold">VIP<\/span>/g, to: '<img src="/assets/logos/logo-principal-blanco.png" alt="Wild Connections" class="nav-logo-img" style="height:28px">' },
     { from: /Mentoras <span class="highlight gold-underline">VIP<\/span>/g, to: 'Wild <span class="highlight gold-underline">Connections</span>' },
     { from: /Crear Cuenta VIP/g, to: 'Crear mi Perfil' },
     { from: /Plan VIP Activo/g, to: 'Plan Activo' },
