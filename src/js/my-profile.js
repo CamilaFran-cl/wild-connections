@@ -99,20 +99,33 @@ import { supabase, checkAuthSession } from './supabase-client.js';
         });
     });
 
-    // 5. Handle Change Photo (Cycle through mock avatars)
-    const mockAvatars = [
-        'assets/mentor-isabella.jpg',
-        'assets/mentor-valentina.jpg',
-        'assets/mentor-sofia.jpg',
-        'assets/mentor-carolina.jpg'
-    ];
+    // 5. Handle Change Photo
+    const photoUploadInput = document.getElementById('photo-upload');
     
     btnChangePhoto.addEventListener('click', () => {
-        let currentIndex = mockAvatars.indexOf(currentAvatar);
-        currentIndex = (currentIndex + 1) % mockAvatars.length;
-        currentAvatar = mockAvatars[currentIndex];
-        avatarPreview.src = currentAvatar;
+        if (photoUploadInput) {
+            photoUploadInput.click();
+        }
     });
+
+    if (photoUploadInput) {
+        photoUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                showToast('La imagen debe ser menor a 2MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentAvatar = event.target.result;
+                avatarPreview.src = currentAvatar;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
     // 6. Handle Logout
     btnLogout.addEventListener('click', async () => {
