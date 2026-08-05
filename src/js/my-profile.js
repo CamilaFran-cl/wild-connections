@@ -20,12 +20,27 @@ import { supabase, checkAuthSession } from './supabase-client.js';
 
     // 2. DOM Elements
     const form = document.getElementById('profile-form');
+    const profileView = document.getElementById('profile-view');
+    
+    // Edit Elements
     const nameInput = document.getElementById('profile-name');
     const phraseInput = document.getElementById('profile-phrase');
     const needsInput = document.getElementById('profile-needs');
     const avatarPreview = document.getElementById('profile-avatar-preview');
     const btnChangePhoto = document.getElementById('btn-change-photo');
+    const photoUploadInput = document.getElementById('photo-upload');
+    
+    // View Elements
+    const viewName = document.getElementById('view-name');
+    const viewPhrase = document.getElementById('view-phrase');
+    const viewNeeds = document.getElementById('view-needs');
+    const viewAvatar = document.getElementById('view-avatar');
+    
+    // Buttons
+    const btnEditMode = document.getElementById('btn-edit-mode');
+    const btnCancelEdit = document.getElementById('btn-cancel-edit');
     const btnLogout = document.getElementById('btn-logout');
+    const btnLogoutView = document.querySelector('#profile-view #btn-logout');
 
     // 3. Load Saved Data
     let savedName = localStorage.getItem('wc_profile_name') || '';
@@ -33,30 +48,55 @@ import { supabase, checkAuthSession } from './supabase-client.js';
     let savedNeeds = localStorage.getItem('wc_profile_needs') || '';
     let currentAvatar = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
 
-    if (supabase && session) {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-            
-            if (data) {
-                savedName = data.name || savedName;
-                savedPhrase = data.phrase || savedPhrase;
-                savedNeeds = data.needs || savedNeeds;
-                currentAvatar = data.avatar_url || currentAvatar;
+    async function loadData() {
+        if (supabase && session) {
+            try {
+                const { data, error } = await supabase
+                    .from('registrations')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .single();
+                
+                if (data) {
+                    savedName = data.fullName || savedName;
+                    savedPhrase = data.expertise || data.businessStage || savedPhrase;
+                    savedNeeds = data.bio || (data.painPoints ? data.painPoints.join(', ') : savedNeeds);
+                    currentAvatar = data.profilePhoto || currentAvatar;
+                }
+            } catch(e) {
+                console.warn("Could not load from registrations table:", e);
             }
-        } catch(e) {
-            console.warn("Could not load from profiles table:", e);
         }
-    }
 
-    // Populate fields
-    if (savedName) nameInput.value = savedName;
-    if (savedPhrase) phraseInput.value = savedPhrase;
-    if (savedNeeds) needsInput.value = savedNeeds;
-    avatarPreview.src = currentAvatar;
+        // Populate fields
+        nameInput.value = savedName;
+        phraseInput.value = savedPhrase;
+        needsInput.value = savedNeeds;
+        avatarPreview.src = currentAvatar;
+        
+        viewName.textContent = savedName;
+        viewPhrase.textContent = savedPhrase || '-';
+        viewNeeds.textContent = savedNeeds || '-';
+        viewAvatar.src = currentAvatar;
+    }
+    
+    await loadData();
+
+    // Toggle Modes
+    btnEditMode.addEventListener('click', () => {
+        profileView.style.display = 'none';
+        form.style.display = 'block';
+    });
+
+    btnCancelEdit.addEventListener('click', () => {
+        form.style.display = 'none';
+        profileView.style.display = 'block';
+        // reset form to saved state
+        nameInput.value = savedName;
+        phraseInput.value = savedPhrase;
+        needsInput.value = savedNeeds;
+        avatarPreview.src = currentAvatar;
+    });
 
     // 4. Handle Form Submit (Save)
     form.addEventListener('submit', async (e) => {
@@ -70,18 +110,18 @@ import { supabase, checkAuthSession } from './supabase-client.js';
         if (supabase && session) {
             try {
                 const { error } = await supabase
-                    .from('profiles')
-                    .upsert({
-                        id: session.user.id,
-                        name: newName,
-                        phrase: newPhrase,
-                        needs: newNeeds,
-                        avatar_url: currentAvatar,
-                        updated_at: new Date().toISOString()
-                    });
+                    .from('registrations')
+                    .update({
+                        fullName: newName,
+                        expertise: newPhrase,
+                        bio: newNeeds,
+                        profilePhoto: currentAvatar
+                    })
+                    .eq('id', session.user.id);
+                    
                 if (error) console.error("Error saving profile to DB:", error);
             } catch(err) {
-                console.warn("Could not save to profiles table:", err);
+                console.warn("Could not save to registrations table:", err);
             }
         }
 
@@ -90,6 +130,17 @@ import { supabase, checkAuthSession } from './supabase-client.js';
         localStorage.setItem('wc_profile_phrase', newPhrase);
         localStorage.setItem('wc_profile_needs', newNeeds);
         localStorage.setItem('wc_profile_image', currentAvatar);
+        
+        // Update variables
+        savedName = newName;
+        savedPhrase = newPhrase;
+        savedNeeds = newNeeds;
+        
+        // Update View
+        viewName.textContent = savedName;
+        viewPhrase.textContent = savedPhrase;
+        viewNeeds.textContent = savedNeeds;
+        viewAvatar.src = currentAvatar;
 
         showToast('¡Perfil actualizado con éxito!');
         
@@ -97,11 +148,13 @@ import { supabase, checkAuthSession } from './supabase-client.js';
         document.querySelectorAll('.nav-profile-avatar img').forEach(img => {
             img.src = currentAvatar;
         });
+        
+        // Return to view mode
+        form.style.display = 'none';
+        profileView.style.display = 'block';
     });
 
     // 5. Handle Change Photo
-    const photoUploadInput = document.getElementById('photo-upload');
-    
     btnChangePhoto.addEventListener('click', () => {
         if (photoUploadInput) {
             photoUploadInput.click();
@@ -128,7 +181,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
     }
 
     // 6. Handle Logout
-    btnLogout.addEventListener('click', async () => {
+    const handleLogout = async () => {
         if(confirm('¿Estás segura de que quieres cerrar sesión?')) {
             if (supabase) {
                 try {
@@ -142,7 +195,10 @@ import { supabase, checkAuthSession } from './supabase-client.js';
             localStorage.clear();
             window.location.href = 'index.html';
         }
-    });
+    };
+    
+    if(btnLogout) btnLogout.addEventListener('click', handleLogout);
+    if(btnLogoutView) btnLogoutView.addEventListener('click', handleLogout);
 });
 
 // Toast function (copied from matches.js logic)

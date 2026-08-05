@@ -121,7 +121,7 @@
             <div class="profile-edit-card reveal">
                 <h1 class="pricing-title" style="font-size: 2rem; margin-bottom: 2rem;">Mi Perfil</h1>
                 
-                <form id="profile-form">
+                <form id="profile-form" style="display: none;">
                     <div class="avatar-edit-wrapper">
                         <img src="assets/mentor-isabella.jpg" alt="Mi Foto" class="avatar avatar-xl profile-avatar-glow" id="profile-avatar-preview">
                         <button type="button" class="avatar-edit-btn" id="btn-change-photo" title="Cambiar Foto">
@@ -136,20 +136,35 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="profile-phrase" class="form-label">Frase o Estado Diario</label>
-                        <input type="text" id="profile-phrase" class="form-control" placeholder="Ej: Lista para escalar mi startup al siguiente nivel..." required>
+                        <label for="profile-phrase" class="form-label">Especialidad o Nicho</label>
+                        <input type="text" id="profile-phrase" class="form-control" placeholder="Ej: Diseño de Productos, Copywriting..." required>
                     </div>
 
                     <div class="form-group">
-                        <label for="profile-needs" class="form-label">Tu Necesidad Inmediata (Busco / Ofrezco)</label>
-                        <textarea id="profile-needs" class="form-control" placeholder="Describe brevemente qué necesitas hoy de la comunidad o qué puedes aportar..."></textarea>
+                        <label for="profile-needs" class="form-label">Acerca de ti (Bio / Necesidades)</label>
+                        <textarea id="profile-needs" class="form-control" placeholder="Describe brevemente quién eres, qué necesitas hoy de la comunidad o qué puedes aportar..."></textarea>
                     </div>
 
                     <div class="action-buttons">
                         <button type="submit" class="btn btn-gold btn-block shimmer-effect">Guardar Cambios</button>
-                        <button type="button" id="btn-logout" class="btn btn-outline btn-block" style="border-color: rgba(255,100,100,0.5); color: #ff8888;">Cerrar Sesión</button>
+                        <button type="button" id="btn-cancel-edit" class="btn btn-outline btn-block">Cancelar</button>
                     </div>
                 </form>
+
+                <!-- Vista de Solo Lectura -->
+                <div id="profile-view" style="text-align: center;">
+                    <div class="avatar-edit-wrapper">
+                        <img src="assets/mentor-isabella.jpg" alt="Mi Foto" class="avatar avatar-xl profile-avatar-glow" id="view-avatar" style="object-fit: cover;">
+                    </div>
+                    <h2 id="view-name" style="margin-top: 1rem; margin-bottom: 0.5rem; font-family: var(--font-primary); font-size: 1.8rem;">Cargando...</h2>
+                    <p id="view-phrase" style="color: var(--gold-primary); font-weight: 500; font-size: 1.1rem; margin-bottom: 1rem;">-</p>
+                    <p id="view-needs" style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6;">-</p>
+                    
+                    <div class="action-buttons">
+                        <button type="button" id="btn-edit-mode" class="btn btn-gold btn-block shimmer-effect">Editar Perfil</button>
+                        <button type="button" id="btn-logout" class="btn btn-outline btn-block" style="border-color: rgba(255,100,100,0.5); color: #ff8888;">Cerrar Sesión</button>
+                    </div>
+                </div>
             </div>
 
         </div>
