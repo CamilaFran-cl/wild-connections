@@ -205,9 +205,9 @@ function renderMentors(filterText = '') {
     const profileClass = isVip ? 'btn btn-gold btn-sm' : 'btn btn-gold btn-sm btn-protected';
     const coffeeClass = isVip ? 'btn btn-outline btn-sm btn-coffee' : 'btn btn-outline btn-sm btn-coffee btn-protected';
     
-    const avatarImg = mentor.profilePhoto || 'assets/mentor-isabella.jpg';
-    const mentorName = mentor.fullName || 'Mentora';
-    const mentorSpecialty = mentor.expertise || mentor.businessStage || 'Emprendedora';
+    const avatarImg = mentor.profile_photo_url || mentor.profilePhoto || 'assets/mentor-isabella.jpg';
+    const mentorName = mentor.full_name || mentor.fullName || 'Mentora';
+    const mentorSpecialty = mentor.expertise || mentor.business_stage || mentor.businessStage || 'Emprendedora';
     const initials = mentorName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
 
     const cardHtml = `
@@ -325,7 +325,7 @@ async function initMatches() {
       const { data: profiles, error } = await supabase
         .from('registrations')
         .select('*')
-        .eq('authDirectory', true);
+        .eq('auth_directory', true);
         
       if (error) {
         console.error("Error fetching mentors:", error);
