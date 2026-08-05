@@ -83,7 +83,7 @@
                 auth_directory: record.authDirectory,
                 auth_matchmaking: record.authMatchmaking,
                 additional_notes: record.additionalNotes,
-                profile_photo_url: record.profilePhoto ? '(stored locally)' : null,
+                profile_photo_url: record.profilePhoto || null,
                 form_complete: record.formComplete || false,
                 registered_at: record.registeredAt,
                 last_updated: record.lastUpdated
@@ -298,6 +298,7 @@
         authDirectory: row.auth_directory,
         authMatchmaking: row.auth_matchmaking,
         additionalNotes: row.additional_notes,
+        profilePhoto: row.profile_photo_url,
         formComplete: row.form_complete,
         registeredAt: row.registered_at,
         lastUpdated: row.last_updated

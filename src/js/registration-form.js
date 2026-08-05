@@ -763,6 +763,7 @@ function bindPhotoUpload() {
       circle.innerHTML = `<img src="${photoDataURL}" alt="Foto de perfil">`;
       circle.classList.add('has-photo');
       formData.profilePhoto = photoDataURL;
+      window.pendingAvatarFile = file;
       clearError('profilePhoto');
     };
     reader.readAsDataURL(file);
@@ -1046,11 +1047,32 @@ async function submitForm() {
     } catch(e) {
       console.warn("Could not sign up via Supabase:", e);
     }
+
+  // 2. Upload Profile Photo to Supabase Storage if present
+  let finalPhotoUrl = formData.profilePhoto || null;
+  if (supabase && userId && window.pendingAvatarFile) {
+    try {
+      const fileName = `avatar-${userId}-${Date.now()}.jpg`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(`${userId}/${fileName}`, window.pendingAvatarFile, { upsert: true });
+
+      if (uploadError) {
+        console.error('Error uploading avatar:', uploadError);
+      } else if (uploadData) {
+        const { data: pubData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path);
+        finalPhotoUrl = pubData.publicUrl;
+      }
+    } catch(err) {
+      console.error('Failed to upload avatar to storage:', err);
+    }
+  }
   }
 
   // Prepare final data
   const registration = {
     ...formData,
+    profilePhoto: finalPhotoUrl, // Make sure we use the final URL
     full_name: formData.fullName, // Map for Supabase column
     registeredAt: new Date().toISOString(),
     lastUpdated: new Date().toISOString(),
@@ -1088,7 +1110,7 @@ async function submitForm() {
   try {
     localStorage.setItem('wc_user_name', formData.fullName || '');
     localStorage.setItem('wc_user_email', formData.email || '');
-    localStorage.setItem('wc_user_avatar', photoDataURL || '');
+    localStorage.setItem('wc_user_avatar', finalPhotoUrl || '');
     localStorage.setItem('wc_registration_data', JSON.stringify(registration));
     localStorage.removeItem('wc_registration_draft');
   } catch (e) {

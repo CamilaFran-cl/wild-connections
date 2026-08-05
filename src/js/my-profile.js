@@ -98,6 +98,8 @@ import { supabase, checkAuthSession } from './supabase-client.js';
         avatarPreview.src = currentAvatar;
     });
 
+    let avatarChanged = false;
+
     // 4. Handle Form Submit (Save)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -109,13 +111,37 @@ import { supabase, checkAuthSession } from './supabase-client.js';
         // Try Supabase first
         if (supabase && session) {
             try {
+                let finalAvatarUrl = currentAvatar;
+
+                // If avatar changed and is a data URL (base64)
+                if (avatarChanged && currentAvatar.startsWith('data:image')) {
+                    try {
+                        const blob = await fetch(currentAvatar).then(res => res.blob());
+                        const fileName = `avatar-${session.user.id}-${Date.now()}.jpg`;
+                        
+                        const { data: uploadData, error: uploadError } = await supabase.storage
+                            .from('avatars')
+                            .upload(`${session.user.id}/${fileName}`, blob, { upsert: true, contentType: 'image/jpeg' });
+                            
+                        if (uploadError) {
+                            console.error('Error uploading avatar:', uploadError);
+                        } else if (uploadData) {
+                            const { data: pubData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path);
+                            finalAvatarUrl = pubData.publicUrl;
+                            currentAvatar = finalAvatarUrl;
+                        }
+                    } catch(uploadEx) {
+                        console.error('Exception uploading avatar:', uploadEx);
+                    }
+                }
+
                 const { error } = await supabase
                     .from('registrations')
                     .update({
-                        fullName: newName,
+                        full_name: newName,
                         expertise: newPhrase,
                         bio: newNeeds,
-                        profilePhoto: currentAvatar
+                        profile_photo_url: finalAvatarUrl
                     })
                     .eq('id', session.user.id);
                     
@@ -135,6 +161,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
         savedName = newName;
         savedPhrase = newPhrase;
         savedNeeds = newNeeds;
+        avatarChanged = false;
         
         // Update View
         viewName.textContent = savedName;
@@ -201,6 +228,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                     // Compress to JPEG with 0.8 quality
                     currentAvatar = canvas.toDataURL('image/jpeg', 0.8);
                     avatarPreview.src = currentAvatar;
+                    avatarChanged = true;
                 };
                 img.src = event.target.result;
             };
