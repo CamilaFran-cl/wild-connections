@@ -1,31 +1,71 @@
-(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
-    // 1. Get mentor ID from URL
+import { supabase, checkAuthSession } from './supabase-client.js';
+
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( async () => {
+
+    // 1. Auth Check
+    let session = null;
+    if (supabase) {
+        try {
+            const authPromise = supabase.auth.getSession().then(res => res.data?.session);
+            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 3000));
+            session = await Promise.race([authPromise, timeoutPromise]);
+        } catch (err) {
+            console.error("Error al obtener sesión:", err);
+        }
+    }
+
+    if (!session && !localStorage.getItem('wc_user_plan')) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const myUserId = session?.user?.id;
+
+    // 2. Get partner ID from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const mentorId = parseInt(urlParams.get('id'));
+    const partnerId = urlParams.get('id');
 
-    // Check if we have a valid mentor ID and data exists
-    if (!mentorId || typeof mentors === 'undefined') {
-        window.location.href = 'matches.html'; // Redirect if no valid ID
+    if (!partnerId) {
+        window.location.href = 'matches.html';
         return;
     }
 
-    // Find the specific mentor
-    const mentor = mentors.find(m => m.id === mentorId);
-    if (!mentor) {
-        window.location.href = 'matches.html'; // Redirect if mentor not found
+    // 3. Load partner profile from Supabase
+    let partner = null;
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('registrations')
+                .select('id, fullName, expertise, profilePhoto')
+                .eq('id', partnerId)
+                .single();
+            if (!error && data) {
+                partner = data;
+            }
+        } catch(e) {
+            console.warn("Could not load partner profile:", e);
+        }
+    }
+
+    if (!partner) {
+        window.location.href = 'matches.html';
         return;
     }
 
-    // 2. Populate Mentor Info Header
-    document.getElementById('mentorAvatar').src = mentor.image;
-    document.getElementById('mentorName').textContent = mentor.name;
-    document.getElementById('mentorSpecialty').textContent = mentor.specialty;
+    // 4. Populate Mentor Info Header
+    const mentorAvatar = document.getElementById('mentorAvatar');
+    const mentorName = document.getElementById('mentorName');
+    const mentorSpecialty = document.getElementById('mentorSpecialty');
 
-    // 3. Variables for booking state
+    if (mentorAvatar) mentorAvatar.src = partner.profilePhoto || 'assets/mentor-isabella.jpg';
+    if (mentorName) mentorName.textContent = partner.fullName || 'Mentora';
+    if (mentorSpecialty) mentorSpecialty.textContent = partner.expertise || 'Emprendedora';
+
+    // 5. Variables for booking state
     let selectedDateStr = null;
     let selectedTimeStr = null;
 
-    // 4. Generate next 7 days for Date Selection
+    // 6. Generate next 7 days for Date Selection
     const datesContainer = document.getElementById('datesContainer');
     const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -52,16 +92,11 @@
         `;
         
         dateCard.addEventListener('click', function() {
-            // Remove selected class from all dates
             document.querySelectorAll('#datesContainer .option-card').forEach(el => el.classList.remove('selected'));
-            // Add to clicked
             this.classList.add('selected');
             selectedDateStr = this.dataset.date;
             
-            // Show step 2
             document.getElementById('step2').classList.add('active');
-            
-            // Scroll to step 2 smoothly
             setTimeout(() => {
                 document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 100);
@@ -70,31 +105,26 @@
         datesContainer.appendChild(dateCard);
     }
 
-    // 5. Time Selection Logic
+    // 7. Time Selection Logic
     const timeCards = document.querySelectorAll('.time-card');
     timeCards.forEach(card => {
         card.addEventListener('click', function() {
-            // Remove selected class from all times
             timeCards.forEach(el => el.classList.remove('selected'));
-            // Add to clicked
             this.classList.add('selected');
             selectedTimeStr = this.dataset.time;
             
-            // Show step 3
             document.getElementById('step3').classList.add('active');
-            
-            // Scroll to step 3 smoothly
             setTimeout(() => {
                 document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 100);
         });
     });
 
-    // 6. Confirmation Form Logic
+    // 8. Confirmation — Save to Supabase
     const btnConfirm = document.getElementById('btnConfirm');
     const bookingTopic = document.getElementById('bookingTopic');
     
-    btnConfirm.addEventListener('click', () => {
+    btnConfirm.addEventListener('click', async () => {
         const topic = bookingTopic.value.trim();
         
         if (!selectedDateStr || !selectedTimeStr) {
@@ -108,29 +138,33 @@
             return;
         }
         
-        // Disable button while processing
         btnConfirm.disabled = true;
         btnConfirm.innerHTML = '<span class="spinner"></span> Confirmando...';
         
-        // Simulate network delay
-        setTimeout(() => {
-            // Save to localStorage
-            const newBooking = {
-                id: 'WC-' + Date.now().toString().slice(-6),
-                mentorId: mentor.id,
-                mentorName: mentor.name,
-                date: selectedDateStr,
-                time: selectedTimeStr,
-                topic: topic,
-                createdAt: new Date().toISOString()
-            };
-            
-            let bookings = JSON.parse(localStorage.getItem('wc_bookings') || '[]');
-            bookings.push(newBooking);
-            localStorage.setItem('wc_bookings', JSON.stringify(bookings));
+        try {
+            if (supabase && myUserId) {
+                const { error } = await supabase
+                    .from('bookings')
+                    .insert({
+                        requester_id: myUserId,
+                        target_id: partnerId,
+                        booking_date: selectedDateStr,
+                        booking_time: selectedTimeStr,
+                        topic: topic,
+                        status: 'pending'
+                    });
+
+                if (error) {
+                    console.error("Error creating booking:", error);
+                    alert('Error al crear la reserva. Inténtalo de nuevo.');
+                    btnConfirm.disabled = false;
+                    btnConfirm.innerHTML = 'Confirmar Reserva ✨';
+                    return;
+                }
+            }
             
             // Update Summary UI
-            document.getElementById('summaryMentor').textContent = mentor.name;
+            document.getElementById('summaryMentor').textContent = partner.fullName || 'Mentora';
             document.getElementById('summaryDate').textContent = selectedDateStr;
             document.getElementById('summaryTime').textContent = selectedTimeStr;
             document.getElementById('summaryTopic').textContent = topic.length > 30 ? topic.substring(0, 30) + '...' : topic;
@@ -143,8 +177,13 @@
             
             document.getElementById('successState').classList.add('active');
             
-            // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 1200);
+
+        } catch(err) {
+            console.error("Booking error:", err);
+            alert('Error de conexión. Inténtalo de nuevo.');
+            btnConfirm.disabled = false;
+            btnConfirm.innerHTML = 'Confirmar Reserva ✨';
+        }
     });
 });
