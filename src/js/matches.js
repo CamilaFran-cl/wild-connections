@@ -341,6 +341,14 @@ async function initMatches() {
 
   const searchInput = document.getElementById('mentor-search');
   if (searchInput) {
+    // Read URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('q');
+    if (queryParam) {
+        searchInput.value = queryParam;
+        renderMentors(queryParam);
+    }
+
     searchInput.addEventListener('input', (e) => {
       renderMentors(e.target.value);
     });
