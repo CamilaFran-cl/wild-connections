@@ -179,12 +179,14 @@ function renderMentors(filterText = '') {
   }).filter(mentor => {
     if (!lowerFilter) return true;
     const searchFields = [
-      mentor.fullName || '',
+      mentor.full_name || mentor.fullName || '',
       mentor.expertise || '',
       mentor.niche || '',
       mentor.location || '',
+      mentor.business_stage || mentor.businessStage || '',
+      ...(Array.isArray(mentor.pain_points) ? mentor.pain_points : []),
       ...(Array.isArray(mentor.painPoints) ? mentor.painPoints : [])
-    ].map(s => s.toLowerCase());
+    ].map(s => String(s).toLowerCase());
     return searchFields.some(f => f.includes(lowerFilter));
   });
 
