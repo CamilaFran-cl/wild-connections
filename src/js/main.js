@@ -139,6 +139,22 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                     Mi Perfil
                 `;
             }
+            
+            // Show Dashboard Link
+            document.querySelectorAll('a[href="dashboard.html"]').forEach(link => {
+                // Only show if it's in the nav
+                if (link.classList.contains('nav-link')) {
+                    link.style.display = 'inline-block';
+                }
+            });
+        } else {
+            // User is logged out
+            // Hide Dashboard Link
+            document.querySelectorAll('a[href="dashboard.html"]').forEach(link => {
+                if (link.classList.contains('nav-link')) {
+                    link.style.display = 'none';
+                }
+            });
         }
     }
     
