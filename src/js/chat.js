@@ -1,33 +1,27 @@
-(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( () => {
-    // 1. Initial Data and Setup
-    const allowedChatIds = [1, 3]; // Valentina and Isabella
-    const storageKey = 'wc_chat_messages';
-    
-    // Mentor generic responses to cycle through
-    const mentorResponses = [
-        '¡Qué buena pregunta! Me encantaría profundizar en eso durante nuestra próxima sesión. 💡',
-        'Totalmente de acuerdo. Trabajemos en una estrategia personalizada para ti.',
-        '¡Excelente progreso! Sigue así y verás resultados increíbles. ✨',
-        'Te recomiendo revisar el material que compartí en nuestro último taller. ¿Te lo reenvío?',
-        'Perfecto, agendemos una sesión esta semana para avanzar en eso. ☕'
-    ];
-    let responseIndex = 0;
+import { supabase, checkAuthSession } from './supabase-client.js';
 
-    // Default pre-loaded messages for realistic feel
-    const defaultMessages = {
-        1: [
-            { sender: 'mentor', text: '¡Hola! Bienvenida a Wild Connections. Vi tu perfil y me encanta tu visión de negocio.', time: '10:00 AM' },
-            { sender: 'user', text: '¡Hola Valentina! Muchas gracias. Estoy muy emocionada de empezar a trabajar contigo.', time: '10:05 AM' },
-            { sender: 'mentor', text: 'Para nuestra primera sesión de escalamiento financiero, ¿podrías enviarme un resumen de tus ingresos del último trimestre?', time: '10:06 AM' }
-        ],
-        3: [
-            { sender: 'mentor', text: '¡Hola! Qué gusto conectar contigo. El bienestar es clave para liderar.', time: 'Ayer' },
-            { sender: 'user', text: '¡Hola Isabella! Totalmente. Últimamente he sentido mucho estrés y necesito volver a mi centro.', time: 'Ayer' },
-            { sender: 'mentor', text: 'Lo entiendo perfecto. Te sugiero empezar con 10 minutos de yoga matutino. ¿Te parece si armamos una rutina personalizada?', time: 'Ayer' }
-        ]
-    };
+(function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( async () => {
 
-    // DOM Elements
+    // 1. Auth Check
+    let session = null;
+    if (supabase) {
+        try {
+            const authPromise = supabase.auth.getSession().then(res => res.data?.session);
+            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 3000));
+            session = await Promise.race([authPromise, timeoutPromise]);
+        } catch (err) {
+            console.error("Error al obtener sesión:", err);
+        }
+    }
+
+    if (!session && !localStorage.getItem('wc_user_plan')) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const myUserId = session?.user?.id;
+
+    // 2. DOM Elements
     const sidebar = document.getElementById('chatSidebar');
     const conversationList = document.getElementById('conversationList');
     const chatMentorAvatar = document.getElementById('chatMentorAvatar');
@@ -39,118 +33,228 @@
     const btnSendMessage = document.getElementById('btnSendMessage');
     const btnBackToConexiones = document.getElementById('btnBackToConexiones');
 
-    // 2. State Management
-    let currentMentorId = 1;
-    let allMessages = JSON.parse(localStorage.getItem(storageKey)) || {};
+    // 3. State
+    let currentPartnerId = null;
+    let conversations = {}; // { partnerId: { profile: {...}, messages: [] } }
+    let realtimeChannel = null;
 
-    // Initialize default messages if local storage is empty for these users
-    allowedChatIds.forEach(id => {
-        if (!allMessages[id]) {
-            allMessages[id] = [...defaultMessages[id]];
+    // 4. Load conversations from DB
+    async function loadConversations() {
+        if (!supabase || !myUserId) return;
+
+        try {
+            // Get all messages where I'm sender or receiver
+            const { data: msgs, error } = await supabase
+                .from('messages')
+                .select('*')
+                .or(`sender_id.eq.${myUserId},receiver_id.eq.${myUserId}`)
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error("Error loading messages:", error);
+                return;
+            }
+
+            // Group by partner
+            const partnerIds = new Set();
+            (msgs || []).forEach(msg => {
+                const partnerId = msg.sender_id === myUserId ? msg.receiver_id : msg.sender_id;
+                partnerIds.add(partnerId);
+                if (!conversations[partnerId]) {
+                    conversations[partnerId] = { profile: null, messages: [] };
+                }
+                conversations[partnerId].messages.push(msg);
+            });
+
+            // Also check URL param for a new conversation
+            const urlParams = new URLSearchParams(window.location.search);
+            const partnerParam = urlParams.get('partner');
+            if (partnerParam) {
+                partnerIds.add(partnerParam);
+                if (!conversations[partnerParam]) {
+                    conversations[partnerParam] = { profile: null, messages: [] };
+                }
+                currentPartnerId = partnerParam;
+            }
+
+            // Load partner profiles
+            if (partnerIds.size > 0) {
+                const { data: profiles, error: profErr } = await supabase
+                    .from('registrations')
+                    .select('id, fullName, expertise, profilePhoto')
+                    .in('id', [...partnerIds]);
+
+                if (!profErr && profiles) {
+                    profiles.forEach(p => {
+                        if (conversations[p.id]) {
+                            conversations[p.id].profile = p;
+                        }
+                    });
+                }
+            }
+
+            // Default to first conversation if no partner set
+            if (!currentPartnerId) {
+                const keys = Object.keys(conversations);
+                if (keys.length > 0) currentPartnerId = keys[0];
+            }
+
+        } catch(e) {
+            console.error("Error in loadConversations:", e);
         }
-    });
-    saveMessages();
-
-    function saveMessages() {
-        localStorage.setItem(storageKey, JSON.stringify(allMessages));
     }
 
-    // 3. Initialization
-    function init() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const mentorParam = parseInt(urlParams.get('mentor'));
-        
-        if (mentorParam && allowedChatIds.includes(mentorParam)) {
-            currentMentorId = mentorParam;
-        }
+    await loadConversations();
 
-        renderSidebar();
-        loadChat(currentMentorId);
+    // 5. Subscribe to Realtime
+    function subscribeToRealtime() {
+        if (!supabase || !myUserId) return;
 
-        // Event Listeners
-        btnSendMessage.addEventListener('click', handleSendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleSendMessage();
-        });
-        
-        btnBackToConexiones.addEventListener('click', () => {
-            window.location.href = 'conexiones.html';
-        });
+        realtimeChannel = supabase
+            .channel('messages-realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `receiver_id=eq.${myUserId}`
+                },
+                (payload) => {
+                    const newMsg = payload.new;
+                    const partnerId = newMsg.sender_id;
+
+                    // Add to conversations
+                    if (!conversations[partnerId]) {
+                        conversations[partnerId] = { profile: null, messages: [] };
+                        // Load profile for new sender
+                        loadPartnerProfile(partnerId);
+                    }
+                    conversations[partnerId].messages.push(newMsg);
+
+                    // If currently viewing this conversation, render the new message
+                    if (partnerId === currentPartnerId) {
+                        appendMessage(newMsg);
+                    }
+
+                    renderSidebar();
+                }
+            )
+            .subscribe();
     }
 
-    // 4. Render Sidebar
+    async function loadPartnerProfile(partnerId) {
+        if (!supabase) return;
+        const { data } = await supabase
+            .from('registrations')
+            .select('id, fullName, expertise, profilePhoto')
+            .eq('id', partnerId)
+            .single();
+        if (data && conversations[partnerId]) {
+            conversations[partnerId].profile = data;
+            renderSidebar();
+        }
+    }
+
+    subscribeToRealtime();
+
+    // 6. Render Sidebar
     function renderSidebar() {
         conversationList.innerHTML = '';
-        
-        allowedChatIds.forEach(id => {
-            const mentor = mentors.find(m => m.id === id);
-            if (!mentor) return;
 
-            const messages = allMessages[id] || [];
-            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-            const lastText = lastMessage ? lastMessage.text : 'Haz clic para chatear';
-            const lastTime = lastMessage ? lastMessage.time : '';
+        const partnerIds = Object.keys(conversations);
+
+        if (partnerIds.length === 0) {
+            conversationList.innerHTML = `
+                <div style="padding: var(--space-6); text-align: center; color: var(--text-secondary);">
+                    <p style="font-style: italic;">No tienes conversaciones aún.</p>
+                    <a href="matches.html" class="btn btn-gold btn-sm" style="margin-top: var(--space-4);">Explorar Directorio</a>
+                </div>
+            `;
+            return;
+        }
+
+        partnerIds.forEach(partnerId => {
+            const conv = conversations[partnerId];
+            const profile = conv.profile || {};
+            const msgs = conv.messages || [];
+            const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+
+            const lastText = lastMsg ? lastMsg.text : 'Haz clic para chatear';
+            const lastTime = lastMsg ? formatTime(lastMsg.created_at) : '';
+
+            const name = profile.fullName || 'Usuario';
+            const avatar = profile.profilePhoto || 'assets/mentor-isabella.jpg';
 
             const item = document.createElement('div');
-            item.className = `conversation-item ${id === currentMentorId ? 'active' : ''}`;
-            item.onclick = () => switchConversation(id);
-            
+            item.className = `conversation-item ${partnerId === currentPartnerId ? 'active' : ''}`;
+            item.onclick = () => switchConversation(partnerId);
+
             item.innerHTML = `
-                <img src="${mentor.image}" class="avatar avatar-sm ${id === currentMentorId ? 'avatar-gold' : ''}" alt="${mentor.name}">
+                <img src="${avatar}" class="avatar avatar-sm ${partnerId === currentPartnerId ? 'avatar-gold' : ''}" alt="${name}" style="object-fit: cover;">
                 <div class="conversation-info">
-                    <div class="conversation-name">${mentor.name}</div>
-                    <div class="conversation-preview">${lastText}</div>
+                    <div class="conversation-name">${name}</div>
+                    <div class="conversation-preview">${lastText.substring(0, 40)}${lastText.length > 40 ? '...' : ''}</div>
                 </div>
                 <div class="conversation-time">${lastTime}</div>
             `;
-            
+
             conversationList.appendChild(item);
         });
     }
 
-    // 5. Switch Conversation
-    function switchConversation(mentorId) {
-        currentMentorId = mentorId;
-        // Update URL without reloading
+    // 7. Switch Conversation
+    function switchConversation(partnerId) {
+        currentPartnerId = partnerId;
         const url = new URL(window.location);
-        url.searchParams.set('mentor', mentorId);
+        url.searchParams.set('partner', partnerId);
         window.history.pushState({}, '', url);
 
         renderSidebar();
-        loadChat(mentorId);
-        
-        // Hide sidebar on mobile if it was open
+        loadChatArea(partnerId);
+
         if (window.innerWidth <= 768) {
             sidebar.classList.remove('open');
         }
     }
 
-    // 6. Load Chat Area
-    function loadChat(mentorId) {
-        const mentor = mentors.find(m => m.id === mentorId);
-        if (!mentor) return;
+    // 8. Load Chat Area
+    function loadChatArea(partnerId) {
+        const conv = conversations[partnerId];
+        if (!conv) return;
 
-        chatMentorAvatar.src = mentor.image;
-        chatMentorName.innerHTML = `${mentor.name} <span class="online-dot"></span>`;
-        chatMentorSpecialty.textContent = mentor.specialty;
+        const profile = conv.profile || {};
+        chatMentorAvatar.src = profile.profilePhoto || 'assets/mentor-isabella.jpg';
+        chatMentorName.innerHTML = `${profile.fullName || 'Usuario'} <span class="online-dot"></span>`;
+        chatMentorSpecialty.textContent = profile.expertise || '';
 
-        renderMessages();
+        renderMessages(partnerId);
         messageInput.focus();
     }
 
-    // 7. Render Messages
-    function renderMessages() {
+    // 9. Render Messages
+    function renderMessages(partnerId) {
         // Clear all except typing indicator
-        const messages = Array.from(chatMessagesArea.children).filter(el => el.id !== 'typingIndicator');
-        messages.forEach(m => m.remove());
+        const existing = Array.from(chatMessagesArea.children).filter(el => el.id !== 'typingIndicator');
+        existing.forEach(el => el.remove());
 
-        const currentMsgs = allMessages[currentMentorId] || [];
-        
-        currentMsgs.forEach(msg => {
-            const msgEl = createMessageElement(msg.sender, msg.text, msg.time);
+        const msgs = conversations[partnerId]?.messages || [];
+
+        msgs.forEach(msg => {
+            const sender = msg.sender_id === myUserId ? 'user' : 'mentor';
+            const time = formatTime(msg.created_at);
+            const msgEl = createMessageElement(sender, msg.text, time);
             chatMessagesArea.insertBefore(msgEl, typingIndicator);
         });
 
+        scrollToBottom();
+    }
+
+    function appendMessage(msg) {
+        const sender = msg.sender_id === myUserId ? 'user' : 'mentor';
+        const time = formatTime(msg.created_at);
+        const msgEl = createMessageElement(sender, msg.text, time);
+        chatMessagesArea.insertBefore(msgEl, typingIndicator);
         scrollToBottom();
     }
 
@@ -158,88 +262,115 @@
         const div = document.createElement('div');
         div.className = `message ${sender}`;
         div.innerHTML = `
-            <div class="message-content">${text}</div>
+            <div class="message-content">${escapeHtml(text)}</div>
             <div class="message-time">${time}</div>
         `;
         return div;
     }
 
-    // 8. Handle Sending Messages
-    function handleSendMessage() {
+    // 10. Send Message
+    async function handleSendMessage() {
         const text = messageInput.value.trim();
-        if (!text) return;
+        if (!text || !currentPartnerId || !myUserId) return;
 
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        // Add user message
-        const newMsg = { sender: 'user', text, time };
-        allMessages[currentMentorId].push(newMsg);
-        saveMessages();
-        
-        const msgEl = createMessageElement('user', text, time);
-        chatMessagesArea.insertBefore(msgEl, typingIndicator);
-        
         messageInput.value = '';
-        scrollToBottom();
-        renderSidebar(); // Update preview
-
-        // Simulate Mentor Typing & Response
-        simulateMentorResponse();
-    }
-
-    function simulateMentorResponse() {
-        // Disable input while 'mentor' is responding
         messageInput.disabled = true;
         btnSendMessage.disabled = true;
-        
-        const mentorIdResp = currentMentorId; // Capture ID in case user switches chat
-        
-        // 1s delay to show typing...
-        setTimeout(() => {
-            if (currentMentorId === mentorIdResp) {
-                typingIndicator.classList.add('active');
-                scrollToBottom();
+
+        try {
+            const { data, error } = await supabase
+                .from('messages')
+                .insert({
+                    sender_id: myUserId,
+                    receiver_id: currentPartnerId,
+                    text: text
+                })
+                .select()
+                .single();
+
+            if (error) {
+                console.error("Error sending message:", error);
+                showToast('Error al enviar mensaje. Inténtalo de nuevo.');
+                messageInput.value = text; // restore
+            } else if (data) {
+                // Add to local state
+                if (!conversations[currentPartnerId]) {
+                    conversations[currentPartnerId] = { profile: null, messages: [] };
+                }
+                conversations[currentPartnerId].messages.push(data);
+                appendMessage(data);
+                renderSidebar();
             }
+        } catch(err) {
+            console.error("Send error:", err);
+            showToast('Error de conexión.');
+            messageInput.value = text;
+        }
 
-            // 2-3s delay to send response
-            const responseDelay = Math.floor(Math.random() * 1000) + 2000;
-            
-            setTimeout(() => {
-                if (currentMentorId === mentorIdResp) {
-                    typingIndicator.classList.remove('active');
-                }
+        messageInput.disabled = false;
+        btnSendMessage.disabled = false;
+        messageInput.focus();
+    }
 
-                const responseText = mentorResponses[responseIndex];
-                responseIndex = (responseIndex + 1) % mentorResponses.length;
-                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                const mentorMsg = { sender: 'mentor', text: responseText, time };
-                allMessages[mentorIdResp].push(mentorMsg);
-                saveMessages();
+    // 11. Event Listeners
+    btnSendMessage.addEventListener('click', handleSendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSendMessage();
+    });
 
-                if (currentMentorId === mentorIdResp) {
-                    const msgEl = createMessageElement('mentor', responseText, time);
-                    chatMessagesArea.insertBefore(msgEl, typingIndicator);
-                    scrollToBottom();
-                }
-                
-                renderSidebar(); // Update preview
-                
-                messageInput.disabled = false;
-                btnSendMessage.disabled = false;
-                if (currentMentorId === mentorIdResp) {
-                    messageInput.focus();
-                }
+    btnBackToConexiones.addEventListener('click', () => {
+        window.location.href = 'conexiones.html';
+    });
 
-            }, responseDelay);
-            
-        }, 1000);
+    // 12. Utilities
+    function formatTime(isoString) {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else if (diffDays === 1) {
+            return 'Ayer';
+        } else if (diffDays < 7) {
+            return date.toLocaleDateString('es', { weekday: 'short' });
+        } else {
+            return date.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     function scrollToBottom() {
         chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
     }
 
-    // Run
-    init();
+    function showToast(message) {
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container';
+            document.body.appendChild(toastContainer);
+        }
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<span style="margin-right: 8px;">✓</span> ${message}`;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // 13. Initial Render
+    renderSidebar();
+    if (currentPartnerId) {
+        loadChatArea(currentPartnerId);
+    }
 });

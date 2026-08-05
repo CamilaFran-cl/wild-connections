@@ -244,12 +244,17 @@ function renderMentors(filterText = '') {
 
   // VIP Coffee button listeners
   if (isVip) {
-      container.querySelectorAll('.btn-coffee').forEach((btn) => {
+      container.querySelectorAll('.btn-coffee').forEach((btn, idx) => {
         btn.addEventListener('click', (e) => {
-          const mName = e.target.getAttribute('data-mentor');
-          showToast(`¡Invitación a café enviada a ${mName}!`);
-          e.target.textContent = 'Enviado ✓';
-          e.target.disabled = true;
+          const mentor = enrichedMentors[idx];
+          if (mentor && mentor.id) {
+            window.location.href = `chat.html?partner=${mentor.id}`;
+          } else {
+            const mName = e.target.getAttribute('data-mentor');
+            showToast(`¡Invitación a café enviada a ${mName}!`);
+            e.target.textContent = 'Enviado ✓';
+            e.target.disabled = true;
+          }
         });
       });
   }
