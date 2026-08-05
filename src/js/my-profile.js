@@ -58,10 +58,10 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                     .single();
                 
                 if (data) {
-                    savedName = data.fullName || savedName;
-                    savedPhrase = data.expertise || data.businessStage || savedPhrase;
-                    savedNeeds = data.bio || (data.painPoints ? data.painPoints.join(', ') : savedNeeds);
-                    currentAvatar = data.profilePhoto || currentAvatar;
+                    savedName = data.full_name || data.fullName || savedName;
+                    savedPhrase = data.expertise || data.business_stage || data.businessStage || savedPhrase;
+                    savedNeeds = data.bio || (data.pain_points ? data.pain_points.join(', ') : (data.painPoints ? data.painPoints.join(', ') : savedNeeds));
+                    currentAvatar = data.profile_photo_url || data.profilePhoto || currentAvatar;
                 }
             } catch(e) {
                 console.warn("Could not load from registrations table:", e);
