@@ -44,52 +44,27 @@
             
             <div class="section-header animate-fadeInUp" style="margin-bottom: var(--space-8);">
                 <h1 class="section-title text-gold" style="text-align: left; margin-bottom: var(--space-2);">Mis Conexiones</h1>
-                <p class="section-subtitle" style="text-align: left; margin: 0;">Mentoras con las que has establecido contacto y agendado sesiones.</p>
+                <p class="section-subtitle" style="text-align: left; margin: 0;">Personas con las que has establecido contacto y agendado sesiones.</p>
             </div>
 
             <!-- TABS -->
             <div class="tabs mb-8 animate-fadeInUp delay-1" style="display: flex; gap: var(--space-4); border-bottom: 1px solid var(--border); padding-bottom: var(--space-4);">
-                <button class="btn btn-ghost" style="color: var(--gold-primary); border-bottom: 2px solid var(--gold-primary); border-radius: 0; padding-bottom: var(--space-4); margin-bottom: calc(var(--space-4) * -1);">Activas (2)</button>
-                <button class="btn btn-ghost" style="border: none;">Pendientes (1)</button>
-                <button class="btn btn-ghost" style="border: none;">Historial</button>
+                <button class="tab-btn-cx active" data-tab="activas" style="background: none; border: none; color: var(--gold-primary); border-bottom: 2px solid var(--gold-primary); border-radius: 0; padding-bottom: var(--space-4); margin-bottom: calc(var(--space-4) * -1); font-family: var(--font-primary); font-weight: 600; font-size: 1rem; cursor: pointer;">Activas (<span id="count-activas">0</span>)</button>
+                <button class="tab-btn-cx" data-tab="pendientes" style="background: none; border: none; color: var(--text-secondary); font-family: var(--font-primary); font-size: 1rem; cursor: pointer;">Pendientes (<span id="count-pendientes">0</span>)</button>
+                <button class="tab-btn-cx" data-tab="historial" style="background: none; border: none; color: var(--text-secondary); font-family: var(--font-primary); font-size: 1rem; cursor: pointer;">Historial</button>
             </div>
 
-            <!-- CONEXIONES GRID -->
-            <div class="grid-3 animate-fadeInUp delay-2">
-                
-                <!-- Conexión 1 -->
-                <div class="card card-interactive hover-lift-glow" style="display: flex; flex-direction: column; gap: var(--space-4);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <img src="assets/mentor-valentina.jpg" class="avatar avatar-lg" alt="Valentina">
-                        <span class="badge badge-success">Sesión Mañana</span>
-                    </div>
-                    <div>
-                        <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: 4px;">Valentina Tanono <svg width="16" height="16" fill="var(--success)" viewBox="0 0 24 24" style="vertical-align: text-top;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></h3>
-                        <p class="text-secondary text-sm">Escalamiento Financiero</p>
-                    </div>
-                    <div style="border-top: 1px solid var(--border); padding-top: var(--space-4); margin-top: auto; display: flex; gap: var(--space-2);">
-                        <a href="chat.html?mentor=1" class="btn btn-gold btn-sm" style="flex: 1;"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg> Mensaje</a>
-                        <button class="btn btn-outline btn-sm" style="flex: 1;">Ver Notas</button>
-                    </div>
-                </div>
-
-                <!-- Conexión 2 -->
-                <div class="card card-interactive hover-lift-glow" style="display: flex; flex-direction: column; gap: var(--space-4);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <img src="assets/mentor-isabella.jpg" class="avatar avatar-lg" alt="Isabella">
-                        <span class="badge badge-tag">Mentora Recurrente</span>
-                    </div>
-                    <div>
-                        <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: 4px;">Isabella Reyes <svg width="16" height="16" fill="var(--success)" viewBox="0 0 24 24" style="vertical-align: text-top;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></h3>
-                        <p class="text-secondary text-sm">Yoga y Bienestar Ejecutivo</p>
-                    </div>
-                    <div style="border-top: 1px solid var(--border); padding-top: var(--space-4); margin-top: auto; display: flex; gap: var(--space-2);">
-                        <a href="chat.html?mentor=3" class="btn btn-gold btn-sm" style="flex: 1;"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg> Mensaje</a>
-                        <button class="btn btn-outline btn-sm" style="flex: 1;">Ver Notas</button>
-                    </div>
-                </div>
-
+            <!-- CONEXIONES CONTENT -->
+            <div id="tab-activas" class="tab-cx-content animate-fadeInUp delay-2">
+                <div class="grid-3" id="conexiones-activas"></div>
             </div>
+            <div id="tab-pendientes" class="tab-cx-content" style="display: none;">
+                <div class="grid-3" id="conexiones-pendientes"></div>
+            </div>
+            <div id="tab-historial" class="tab-cx-content" style="display: none;">
+                <div class="grid-3" id="conexiones-historial"></div>
+            </div>
+
         </div>
     </main>
 
@@ -121,6 +96,6 @@
 
     <script type="module" src="/js/supabase-client.js"></script>
     <script type="module" src="/js/main.js"></script>
-    <script type="module" src="/js/user.js"></script>
+    <script type="module" src="/js/conexiones.js"></script>
 </body>
 </html>
