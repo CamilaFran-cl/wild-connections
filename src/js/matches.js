@@ -3,6 +3,7 @@
    BFF matching (personal affinity) + Commercial matching
    (offer ↔ demand) based on registration form data
    ============================================================ */
+import { supabase } from './supabase-client.js';
 
 // ── BFF Matching Algorithm ─────────────────
 // Calculates personal compatibility for networking/friendship
@@ -135,6 +136,10 @@ function calculateCommercialMatch(user, candidate) {
   return Math.min(score, 100);
 }
 
+// ── Global State ───────────────────────
+let allMentors = [];
+let currentUserId = null;
+
 // ── Render Functions ───────────────────────
 
 function renderMentors(filterText = '') {
@@ -151,19 +156,13 @@ function renderMentors(filterText = '') {
   if (savedData) {
     try { userData = JSON.parse(savedData); } catch(e) {}
   }
-  // Fallback to old onboarding data
-  if (Object.keys(userData).length === 0) {
-    const oldData = localStorage.getItem('wc_onboarding_answers');
-    if (oldData) {
-      try { userData = JSON.parse(oldData); } catch(e) {}
-    }
-  }
-
+  
   const hasUserData = Object.keys(userData).length > 0;
+  const isVip = !!localStorage.getItem('wc_user_plan'); // Temporarily keep localStorage for VIP check
 
   // Calculate matches
-  const enrichedMentors = mentors.map(mentor => {
-    let bffScore = mentor.affinity || 70;
+  const enrichedMentors = allMentors.map(mentor => {
+    let bffScore = 70;
     let commercialScore = 0;
 
     if (hasUserData) {
@@ -180,12 +179,11 @@ function renderMentors(filterText = '') {
   }).filter(mentor => {
     if (!lowerFilter) return true;
     const searchFields = [
-      mentor.name,
-      mentor.specialty,
-      mentor.niche || '',
+      mentor.fullName || '',
       mentor.expertise || '',
+      mentor.niche || '',
       mentor.location || '',
-      ...(mentor.tags || [])
+      ...(Array.isArray(mentor.painPoints) ? mentor.painPoints : [])
     ].map(s => s.toLowerCase());
     return searchFields.some(f => f.includes(lowerFilter));
   });
@@ -199,7 +197,7 @@ function renderMentors(filterText = '') {
   }
 
   enrichedMentors.forEach(mentor => {
-    const tagsHtml = (mentor.tags || []).map(tag => `<span class="badge-tag">${tag}</span>`).join('');
+    const tagsHtml = (Array.isArray(mentor.painPoints) ? mentor.painPoints : []).slice(0, 3).map(tag => `<span class="badge-tag">${tag}</span>`).join('');
     const commercialBadge = mentor.commercialScore > 20
       ? `<span class="badge-commercial" title="Match comercial: tu expertise y sus necesidades se cruzan">💼 Match Comercial</span>`
       : '';
@@ -207,19 +205,23 @@ function renderMentors(filterText = '') {
     const profileHref = isVip ? `profile.html?id=${mentor.id}` : '#';
     const profileClass = isVip ? 'btn btn-gold btn-sm' : 'btn btn-gold btn-sm btn-protected';
     const coffeeClass = isVip ? 'btn btn-outline btn-sm btn-coffee' : 'btn btn-outline btn-sm btn-coffee btn-protected';
+    
+    const avatarImg = mentor.profilePhoto || 'assets/mentor-isabella.jpg';
+    const mentorName = mentor.fullName || 'Mentora';
+    const mentorSpecialty = mentor.expertise || mentor.businessStage || 'Emprendedora';
 
     const cardHtml = `
 <div class="mentor-card hover-lift-glow animate-fadeInUp" style="align-items: flex-start; padding: var(--space-6);">
     <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-3); min-width: 100px;">
-        <img src="${mentor.image}" alt="${mentor.name}" class="avatar avatar-lg avatar-gold">
+        <img src="${avatarImg}" alt="${mentorName}" class="avatar avatar-lg avatar-gold" style="object-fit: cover;">
         <span class="badge badge-gold" style="font-size: 0.7rem;">${mentor.bffScore}% Afinidad</span>
     </div>
     
     <div class="mentor-info" style="flex: 1; min-width: 0; padding-left: var(--space-2);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2);">
             <div>
-                <h3 class="mentor-name" style="font-size: 1.25rem; margin-bottom: 2px;">${mentor.name}</h3>
-                <p class="mentor-specialty" style="font-size: 0.95rem; margin-bottom: 4px;">${mentor.specialty}</p>
+                <h3 class="mentor-name" style="font-size: 1.25rem; margin-bottom: 2px;">${mentorName}</h3>
+                <p class="mentor-specialty" style="font-size: 0.95rem; margin-bottom: 4px;">${mentorSpecialty}</p>
                 ${mentor.location ? `<p style="font-size: 0.8rem; color: var(--text-tertiary);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>${mentor.location}</p>` : ''}
             </div>
             ${commercialBadge}
@@ -231,7 +233,7 @@ function renderMentors(filterText = '') {
         
         <div class="mentor-actions" style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
             <a href="${profileHref}" class="${profileClass}">Ver Perfil</a>
-            <button class="${coffeeClass}" data-mentor="${mentor.name}">Invitar un Café ☕</button>
+            <button class="${coffeeClass}" data-mentor="${mentorName}">Invitar un Café ☕</button>
         </div>
     </div>
 </div>
@@ -244,8 +246,8 @@ function renderMentors(filterText = '') {
   if (isVip) {
       container.querySelectorAll('.btn-coffee').forEach((btn) => {
         btn.addEventListener('click', (e) => {
-          const mentorName = e.target.getAttribute('data-mentor');
-          showToast(`¡Invitación a café enviada a ${mentorName}!`);
+          const mName = e.target.getAttribute('data-mentor');
+          showToast(`¡Invitación a café enviada a ${mName}!`);
           e.target.textContent = 'Enviado ✓';
           e.target.disabled = true;
         });
@@ -307,7 +309,34 @@ function showToast(message) {
 }
 
 // ── Init ───────────────────────────────────
-function initMatches() {
+async function initMatches() {
+  const container = document.getElementById('mentors-container');
+  if (container) {
+      container.innerHTML = '<p class="text-secondary text-center" style="padding: 2rem;">Cargando perfiles...</p>';
+  }
+
+  if (supabase) {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData && sessionData.session) {
+          currentUserId = sessionData.session.user.id;
+      }
+      
+      const { data: profiles, error } = await supabase
+        .from('registrations')
+        .select('*')
+        .eq('authDirectory', true);
+        
+      if (error) {
+        console.error("Error fetching mentors:", error);
+      } else if (profiles) {
+        allMentors = profiles.filter(p => p.id !== currentUserId);
+      }
+    } catch(e) {
+      console.error("Failed to load real mentors", e);
+    }
+  }
+
   renderMentors();
 
   const searchInput = document.getElementById('mentor-search');
@@ -319,7 +348,7 @@ function initMatches() {
 }
 
 if (document.readyState === 'loading') {
-  (function(cb){if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cb);}else{cb();}})( initMatches);
+  document.addEventListener('DOMContentLoaded', initMatches);
 } else {
   initMatches();
 }
