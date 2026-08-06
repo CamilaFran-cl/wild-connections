@@ -54,6 +54,7 @@
             .from(TABLE_NAME)
             .upsert(
               {
+                id: record.id,
                 email: record.email || record.instagram,
                 full_name: record.fullName,
                 location: record.location,

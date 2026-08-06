@@ -1069,40 +1069,35 @@ async function submitForm() {
   }
   }
 
-  // Prepare final data
+  // Prepare final data using WCDatabase mapping format
   const registration = {
     ...formData,
-    profilePhoto: finalPhotoUrl, // Make sure we use the final URL
-    full_name: formData.fullName, // Map for Supabase column
+    profilePhoto: finalPhotoUrl, 
+    formComplete: true,
     registeredAt: new Date().toISOString(),
-    lastUpdated: new Date().toISOString(),
-    formComplete: true
+    lastUpdated: new Date().toISOString()
   };
 
   // Remove duplicate/unwanted fields before saving to DB
-  delete registration.fullName;
   delete registration.password;
 
   if (userId) {
     registration.id = userId;
   }
 
-  // IMMEDIATELY insert into DB if Supabase is available
-  if (supabase) {
+  // Save to DB using the database helper which maps camelCase to snake_case correctly
+  if (window.WCDatabase) {
     try {
-      const { error: dbError } = await supabase
-        .from('registrations')
-        .upsert(registration);
-        
-      if (dbError) {
-        console.error("DB Error:", dbError);
-        alert("Hubo un error al guardar tu perfil: " + dbError.message);
-        btnNext.textContent = btnText;
-        btnNext.classList.remove('submitting');
-        return;
+      const { success, error } = await window.WCDatabase.saveRegistration(registration);
+      if (!success || error) {
+        throw new Error(error || "Unknown database error");
       }
-    } catch(e) {
-      console.warn("Error upserting registration:", e);
+    } catch (e) {
+      console.error("DB Error:", e);
+      alert("Hubo un error al guardar tu perfil: " + e.message);
+      btnNext.textContent = btnText;
+      btnNext.classList.remove('submitting');
+      return;
     }
   }
 
