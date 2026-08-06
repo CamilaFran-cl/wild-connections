@@ -140,7 +140,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                     .update({
                         full_name: newName,
                         expertise: newPhrase,
-                        bio: newNeeds,
+                        pain_points: newNeeds ? newNeeds.split(',').map(s => s.trim()) : [],
                         profile_photo_url: finalAvatarUrl
                     })
                     .eq('id', session.user.id);
