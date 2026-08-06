@@ -13,7 +13,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
         }
     }
 
-    if (!session && !localStorage.getItem('wc_user_plan')) {
+    if (!session) {
         window.location.href = 'login.html';
         return;
     }

@@ -37,6 +37,19 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                     // Successful login
                     // Handle stale localStorage keys so profile fetches the actual plan
                     localStorage.removeItem('wc_user_plan');
+                    
+                    // Fetch registration data for matching
+                    try {
+                        const { data: regData } = await supabase
+                            .from('registrations')
+                            .select('*')
+                            .eq('id', data.session.user.id)
+                            .single();
+                        if (regData) {
+                            localStorage.setItem('wc_registration_data', JSON.stringify(regData));
+                        }
+                    } catch(e) { console.error("Error fetching registration data on login", e); }
+                    
                     window.location.href = 'my-profile.html';
                 } else {
                     alert("Error: Supabase no está configurado.");

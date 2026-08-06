@@ -177,6 +177,7 @@ function renderMentors(filterText = '') {
       combinedScore: Math.round(bffScore * 0.6 + commercialScore * 0.4)
     };
   }).filter(mentor => {
+    if (currentUserId && mentor.id === currentUserId) return false;
     if (!lowerFilter) return true;
     const searchFields = [
       mentor.full_name || mentor.fullName || '',
