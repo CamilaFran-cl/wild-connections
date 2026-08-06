@@ -333,7 +333,11 @@ async function initMatches() {
       if (error) {
         console.error("Error fetching mentors:", error);
       } else if (profiles) {
-        allMentors = profiles.filter(p => p.id !== currentUserId);
+        const excludedIds = [
+            '81ec5383-4036-41a2-9113-aa3d7d705155', // Orphaned Mandia Araya
+            '15ca1286-be86-454d-8189-5046b797bf2c'  // Test User
+        ];
+        allMentors = profiles.filter(p => p.id !== currentUserId && !excludedIds.includes(p.id));
       }
     } catch(e) {
       console.error("Failed to load real mentors", e);

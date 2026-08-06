@@ -51,11 +51,41 @@ import { supabase, checkAuthSession } from './supabase-client.js';
     async function loadData() {
         if (supabase && session) {
             try {
-                const { data, error } = await supabase
+                let { data, error } = await supabase
                     .from('registrations')
                     .select('*')
                     .eq('id', session.user.id)
                     .single();
+                
+                // If not found by ID, try to find by email (in case auth user was recreated)
+                if (!data && session.user.email) {
+                    const { data: emailData } = await supabase
+                        .from('registrations')
+                        .select('*')
+                        .eq('email', session.user.email)
+                        .single();
+                        
+                    if (emailData) {
+                        // The old row is orphaned and we cannot update it due to RLS.
+                        // So we will clone it into a new row with a modified email to bypass the UNIQUE constraint.
+                        const newRecord = { ...emailData, id: session.user.id, email: session.user.email + '.new' };
+                        
+                        // Check if we already cloned it
+                        const { data: existingClone } = await supabase.from('registrations').select('*').eq('id', session.user.id).single();
+                        
+                        if (existingClone) {
+                            data = existingClone;
+                        } else {
+                            const { data: insertedData, error: insertErr } = await supabase.from('registrations').insert(newRecord).select().single();
+                            if (!insertErr && insertedData) {
+                                data = insertedData;
+                            } else {
+                                console.error("Could not clone orphaned row:", insertErr);
+                                data = emailData; // fallback read-only
+                            }
+                        }
+                    }
+                }
                 
                 if (data) {
                     savedName = data.full_name || data.fullName || savedName;
