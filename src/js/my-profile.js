@@ -167,13 +167,15 @@ import { supabase, checkAuthSession } from './supabase-client.js';
 
                 const { error } = await supabase
                     .from('registrations')
-                    .update({
+                    .upsert({
+                        id: session.user.id,
+                        email: session.user.email,
                         full_name: newName,
                         expertise: newPhrase,
                         pain_points: newNeeds ? newNeeds.split(',').map(s => s.trim()) : [],
-                        profile_photo_url: finalAvatarUrl
-                    })
-                    .eq('id', session.user.id);
+                        profile_photo_url: finalAvatarUrl,
+                        auth_directory: true // Default to true if they are saving from profile
+                    }, { onConflict: 'id' });
                     
                 if (error) console.error("Error saving profile to DB:", error);
             } catch(err) {
