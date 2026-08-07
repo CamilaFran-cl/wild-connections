@@ -81,6 +81,7 @@ import { supabase, checkAuthSession, supabaseUrl, supabaseKey } from './supabase
                                 method: 'POST',
                                 headers: {
                                     'apikey': supabaseKey,
+                                    'Authorization': `Bearer ${supabaseKey}`,
                                     'Content-Type': 'application/json',
                                     'Prefer': 'return=representation'
                                 },
@@ -193,6 +194,7 @@ import { supabase, checkAuthSession, supabaseUrl, supabaseKey } from './supabase
                     method: 'POST',
                     headers: {
                         'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
                         'Content-Type': 'application/json',
                         'Prefer': 'resolution=merge-duplicates'
                     },
