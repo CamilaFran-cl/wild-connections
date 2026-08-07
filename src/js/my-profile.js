@@ -81,6 +81,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                                 data = insertedData;
                             } else {
                                 console.error("Could not clone orphaned row:", insertErr);
+                                alert("Error cloning profile: " + JSON.stringify(insertErr));
                                 data = emailData; // fallback read-only
                             }
                         }
@@ -177,9 +178,13 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                         auth_directory: true // Default to true if they are saving from profile
                     }, { onConflict: 'id' });
                     
-                if (error) console.error("Error saving profile to DB:", error);
+                if (error) {
+                    console.error("Error saving profile to DB:", error);
+                    alert("Error guardando perfil: " + JSON.stringify(error));
+                }
             } catch(err) {
                 console.warn("Could not save to registrations table:", err);
+                alert("Error de conexión al guardar: " + err.message);
             }
         }
 
