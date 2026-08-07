@@ -50,50 +50,60 @@
       // Try Supabase
       if (supabase) {
         try {
-          const { data: result, error } = await supabase
-            .from(TABLE_NAME)
-            .upsert(
-              {
-                id: record.id,
-                email: record.email || record.instagram,
-                full_name: record.fullName,
-                location: record.location,
-                instagram: record.instagram,
-                business_stage: record.businessStage,
-                monthly_revenue: record.monthlyRevenue,
-                business_years: record.businessYears,
-                delivery_model: record.deliveryModel,
-                team_size: record.teamSize,
-                challenge_90days: record.challenge90Days,
-                pain_points: record.painPoints,
-                niche: record.niche,
-                expertise: record.expertise,
-                target_audience: record.targetAudience,
-                ideal_client: record.idealClient,
-                main_offer_price: record.mainOfferPrice,
-                needs_to_hire: record.needsToHire,
-                microphone_pitch: record.microphonePitch,
-                hobbies: record.hobbies,
-                social_energy: record.socialEnergy,
-                human_design: record.humanDesign,
-                my_person_criteria: record.myPersonCriteria,
-                next_objective: record.nextObjective,
-                three_year_vision: record.threeYearVision,
-                event_expectation: record.eventExpectation,
-                purchase_reason: record.purchaseReason,
-                auth_directory: record.authDirectory,
-                auth_matchmaking: record.authMatchmaking,
-                additional_notes: record.additionalNotes,
-                profile_photo_url: record.profilePhoto || null,
-                form_complete: record.formComplete || false,
-                registered_at: record.registeredAt,
-                last_updated: record.lastUpdated
-              },
-              { onConflict: 'email' }
-            );
+          const payload = {
+            id: record.id,
+            email: record.email || record.instagram,
+            full_name: record.fullName,
+            location: record.location,
+            instagram: record.instagram,
+            business_stage: record.businessStage,
+            monthly_revenue: record.monthlyRevenue,
+            business_years: record.businessYears,
+            delivery_model: record.deliveryModel,
+            team_size: record.teamSize,
+            challenge_90days: record.challenge90Days,
+            pain_points: record.painPoints,
+            niche: record.niche,
+            expertise: record.expertise,
+            target_audience: record.targetAudience,
+            ideal_client: record.idealClient,
+            main_offer_price: record.mainOfferPrice,
+            needs_to_hire: record.needsToHire,
+            microphone_pitch: record.microphonePitch,
+            hobbies: record.hobbies,
+            social_energy: record.socialEnergy,
+            human_design: record.humanDesign,
+            my_person_criteria: record.myPersonCriteria,
+            next_objective: record.nextObjective,
+            three_year_vision: record.threeYearVision,
+            event_expectation: record.eventExpectation,
+            purchase_reason: record.purchaseReason,
+            auth_directory: record.authDirectory,
+            auth_matchmaking: record.authMatchmaking,
+            additional_notes: record.additionalNotes,
+            profile_photo_url: record.profilePhoto || null,
+            form_complete: record.formComplete || false,
+            registered_at: record.registeredAt,
+            last_updated: record.lastUpdated
+          };
 
-          if (error) throw error;
-          return { success: true, id: result?.[0]?.id };
+          const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?on_conflict=email`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates,return=representation'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!saveRes.ok) {
+            const errText = await saveRes.text();
+            throw new Error(`DB Error: ${errText}`);
+          }
+          const resultArr = await saveRes.json();
+          return { success: true, id: resultArr[0]?.id };
         } catch (e) {
           console.warn('Supabase save failed:', e);
           return { success: true, id: 'local', error: 'Saved locally only' };
