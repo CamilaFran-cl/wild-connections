@@ -1015,6 +1015,8 @@ function showSaveIndicator() {
 
 // ── Submit ─────────────────────────────────
 async function submitForm() {
+  if (btnNext.classList.contains('submitting')) return;
+  
   const btnText = btnNext.textContent;
   btnNext.textContent = 'Enviando...';
   btnNext.classList.add('submitting');
