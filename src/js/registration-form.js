@@ -1021,103 +1021,105 @@ async function submitForm() {
   btnNext.textContent = 'Enviando...';
   btnNext.classList.add('submitting');
 
-  let userId = null;
+  try {
+    let userId = null;
 
-  // 1. Supabase Auth Sign Up
-  if (supabase) {
-    try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName
+    // 1. Supabase Auth Sign Up
+    if (supabase) {
+      try {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.fullName
+            }
           }
+        });
+        if (authError) {
+          console.error("Auth Error:", authError);
+          alert("Hubo un error al registrar tu cuenta: " + authError.message);
+          return;
         }
-      });
-      if (authError) {
-        console.error("Auth Error:", authError);
-        alert("Hubo un error al registrar tu cuenta: " + authError.message);
-        btnNext.textContent = btnText;
-        btnNext.classList.remove('submitting');
+
+        if (authData && authData.user) {
+          userId = authData.user.id;
+        }
+      } catch(e) {
+        console.warn("Could not sign up via Supabase:", e);
+      }
+    }
+
+    // 2. Upload Profile Photo to Supabase Storage if present
+    let finalPhotoUrl = formData.profilePhoto || null;
+    if (supabase && userId && window.pendingAvatarFile) {
+      try {
+        const fileName = `avatar-${userId}-${Date.now()}.jpg`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(`${userId}/${fileName}`, window.pendingAvatarFile, { upsert: true });
+
+        if (uploadError) {
+          console.error('Error uploading avatar:', uploadError);
+        } else if (uploadData) {
+          const { data: pubData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path);
+          finalPhotoUrl = pubData.publicUrl;
+        }
+      } catch(err) {
+        console.error('Failed to upload avatar to storage:', err);
+      }
+    }
+
+    // Prepare final data using WCDatabase mapping format
+    const registration = {
+      ...formData,
+      profilePhoto: finalPhotoUrl, 
+      formComplete: true,
+      registeredAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString()
+    };
+
+    // Remove duplicate/unwanted fields before saving to DB
+    delete registration.password;
+
+    if (userId) {
+      registration.id = userId;
+    }
+
+    // Save to DB using the database helper which maps camelCase to snake_case correctly
+    if (window.WCDatabase) {
+      try {
+        const { success, error } = await window.WCDatabase.saveRegistration(registration);
+        if (!success || error) {
+          throw new Error(error || "Unknown database error");
+        }
+      } catch (e) {
+        console.error("DB Error:", e);
+        alert("Hubo un error al guardar tu perfil: " + (e.message || e));
         return;
       }
-
-      if (authData && authData.user) {
-        userId = authData.user.id;
-      }
-    } catch(e) {
-      console.warn("Could not sign up via Supabase:", e);
     }
 
-  // 2. Upload Profile Photo to Supabase Storage if present
-  let finalPhotoUrl = formData.profilePhoto || null;
-  if (supabase && userId && window.pendingAvatarFile) {
+    // Store in localStorage
     try {
-      const fileName = `avatar-${userId}-${Date.now()}.jpg`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(`${userId}/${fileName}`, window.pendingAvatarFile, { upsert: true });
-
-      if (uploadError) {
-        console.error('Error uploading avatar:', uploadError);
-      } else if (uploadData) {
-        const { data: pubData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path);
-        finalPhotoUrl = pubData.publicUrl;
-      }
-    } catch(err) {
-      console.error('Failed to upload avatar to storage:', err);
-    }
-  }
-  }
-
-  // Prepare final data using WCDatabase mapping format
-  const registration = {
-    ...formData,
-    profilePhoto: finalPhotoUrl, 
-    formComplete: true,
-    registeredAt: new Date().toISOString(),
-    lastUpdated: new Date().toISOString()
-  };
-
-  // Remove duplicate/unwanted fields before saving to DB
-  delete registration.password;
-
-  if (userId) {
-    registration.id = userId;
-  }
-
-  // Save to DB using the database helper which maps camelCase to snake_case correctly
-  if (window.WCDatabase) {
-    try {
-      const { success, error } = await window.WCDatabase.saveRegistration(registration);
-      if (!success || error) {
-        throw new Error(error || "Unknown database error");
-      }
+      localStorage.setItem('wc_user_name', formData.fullName || '');
+      localStorage.setItem('wc_user_email', formData.email || '');
+      localStorage.setItem('wc_user_avatar', finalPhotoUrl || '');
+      localStorage.setItem('wc_registration_data', JSON.stringify(registration));
+      localStorage.removeItem('wc_registration_draft');
     } catch (e) {
-      console.error("DB Error:", e);
-      alert("Hubo un error al guardar tu perfil: " + e.message);
-      btnNext.textContent = btnText;
-      btnNext.classList.remove('submitting');
-      return;
+      console.error('Error saving registration:', e);
     }
-  }
 
-  // Store in localStorage
-  try {
-    localStorage.setItem('wc_user_name', formData.fullName || '');
-    localStorage.setItem('wc_user_email', formData.email || '');
-    localStorage.setItem('wc_user_avatar', finalPhotoUrl || '');
-    localStorage.setItem('wc_registration_data', JSON.stringify(registration));
-    localStorage.removeItem('wc_registration_draft');
-  } catch (e) {
-    console.error('Error saving registration:', e);
+    // Show confirmation
+    showConfirmation(registration);
+  } catch (globalError) {
+    console.error("Unhandled error in submitForm:", globalError);
+    alert("Hubo un error inesperado: " + (globalError.message || globalError));
+  } finally {
+    btnNext.textContent = btnText;
+    btnNext.classList.remove('submitting');
   }
-
-  // Show confirmation
-  btnNext.textContent = btnText;
-  btnNext.classList.remove('submitting');
-  showConfirmation(registration);
 }
 
 function showConfirmation(data) {
