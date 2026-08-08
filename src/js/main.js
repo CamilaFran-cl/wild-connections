@@ -117,7 +117,10 @@ import { supabase, checkAuthSession } from './supabase-client.js';
 
         if (isAuthenticated) {
             // User is logged in
-            const avatarUrl = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
+            let avatarUrl = localStorage.getItem('wc_profile_image');
+            if (!avatarUrl || avatarUrl === 'undefined' || avatarUrl.includes('assets/')) {
+                avatarUrl = ''; // Avoid 404 on missing asset
+            }
             
             // Desktop Navbar
             const loginLinkDesktop = document.querySelector('.nav-actions a[href="login.html"]');
@@ -125,8 +128,8 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                 const profileLink = document.createElement('a');
                 profileLink.href = 'my-profile.html';
                 profileLink.className = 'nav-profile-avatar';
-                profileLink.style.cssText = 'margin-right: 15px; display: inline-block; width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold-primary); vertical-align: middle; cursor: pointer;';
-                profileLink.innerHTML = `<img src="${avatarUrl}" alt="Mi Perfil" style="width: 100%; height: 100%; object-fit: cover;">`;
+                profileLink.style.cssText = 'margin-right: 15px; display: inline-block; width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold-primary); vertical-align: middle; cursor: pointer; background: var(--bg-surface);';
+                profileLink.innerHTML = `<img src="${avatarUrl}" alt="Mi Perfil" style="width: 100%; height: 100%; object-fit: cover; display: ${avatarUrl ? 'block' : 'none'};">`;
                 loginLinkDesktop.replaceWith(profileLink);
             }
 
@@ -135,9 +138,29 @@ import { supabase, checkAuthSession } from './supabase-client.js';
             if (loginLinkMobile) {
                 loginLinkMobile.href = 'my-profile.html';
                 loginLinkMobile.innerHTML = `
-                    <img src="${avatarUrl}" alt="Perfil" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-primary);">
+                    <img src="${avatarUrl}" alt="Perfil" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-primary); display: ${avatarUrl ? 'inline-block' : 'none'};">
                     Mi Perfil
                 `;
+            }
+
+            // Fetch real avatar asynchronously if we don't have it (or to ensure it's up to date)
+            if (supabase) {
+                supabase.auth.getSession().then(({data}) => {
+                    const uid = data?.session?.user?.id;
+                    if (uid) {
+                        supabase.from('registrations').select('profile_photo_url').eq('id', uid).single().then(res => {
+                            if (res.data && res.data.profile_photo_url) {
+                                const realAvatar = res.data.profile_photo_url;
+                                localStorage.setItem('wc_profile_image', realAvatar);
+                                document.querySelectorAll('.nav-profile-avatar img, .mobile-nav-inner img').forEach(img => {
+                                    img.src = realAvatar;
+                                    img.style.display = 'inline-block';
+                                    if (img.parentElement.classList.contains('nav-profile-avatar')) img.style.display = 'block';
+                                });
+                            }
+                        });
+                    }
+                });
             }
             
             // Show Dashboard Link

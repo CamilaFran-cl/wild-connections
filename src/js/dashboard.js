@@ -18,12 +18,12 @@ import { supabase } from './supabase-client.js';
         try {
             const { data } = await supabase
                 .from('registrations')
-                .select('fullName')
+                .select('full_name')
                 .eq('id', myUserId)
                 .single();
-            if (data && data.fullName) {
+            if (data && data.full_name) {
                 const nameEl = document.querySelector('.user-name');
-                if (nameEl) nameEl.textContent = 'Hola, ' + data.fullName.split(' ')[0];
+                if (nameEl) nameEl.textContent = 'Hola, ' + data.full_name.split(' ')[0];
             }
         } catch(e) {}
     }
