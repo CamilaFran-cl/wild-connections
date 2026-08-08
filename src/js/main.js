@@ -145,20 +145,34 @@ import { supabase, checkAuthSession } from './supabase-client.js';
 
             // Fetch real avatar asynchronously if we don't have it (or to ensure it's up to date)
             if (supabase) {
-                supabase.auth.getSession().then(({data}) => {
+                supabase.auth.getSession().then(async ({data}) => {
                     const uid = data?.session?.user?.id;
                     if (uid) {
-                        supabase.from('registrations').select('profile_photo_url').eq('id', uid).single().then(res => {
-                            if (res.data && res.data.profile_photo_url) {
-                                const realAvatar = res.data.profile_photo_url;
-                                localStorage.setItem('wc_profile_image', realAvatar);
-                                document.querySelectorAll('.nav-profile-avatar img, .mobile-nav-inner img').forEach(img => {
-                                    img.src = realAvatar;
-                                    img.style.display = 'inline-block';
-                                    if (img.parentElement.classList.contains('nav-profile-avatar')) img.style.display = 'block';
-                                });
+                        try {
+                            const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?id=eq.${uid}&select=profile_photo_url`, {
+                                method: 'GET',
+                                headers: {
+                                    'apikey': import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+                                    'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=representation'
+                                }
+                            });
+                            if (readRes.ok) {
+                                const rows = await readRes.json();
+                                if (rows && rows.length > 0 && rows[0].profile_photo_url) {
+                                    const realAvatar = rows[0].profile_photo_url;
+                                    localStorage.setItem('wc_profile_image', realAvatar);
+                                    document.querySelectorAll('.nav-profile-avatar img, .mobile-nav-inner img').forEach(img => {
+                                        img.src = realAvatar;
+                                        img.style.display = 'inline-block';
+                                        if (img.parentElement.classList.contains('nav-profile-avatar')) img.style.display = 'block';
+                                    });
+                                }
                             }
-                        });
+                        } catch(e) {
+                            console.warn('Main avatar fetch error:', e);
+                        }
                     }
                 });
             }

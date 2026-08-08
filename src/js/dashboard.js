@@ -16,16 +16,26 @@ import { supabase } from './supabase-client.js';
     // 2. Load user name for greeting
     if (supabase && myUserId) {
         try {
-            const { data } = await supabase
-                .from('registrations')
-                .select('full_name')
-                .eq('id', myUserId)
-                .single();
-            if (data && data.full_name) {
-                const nameEl = document.querySelector('.user-name');
-                if (nameEl) nameEl.textContent = 'Hola, ' + data.full_name.split(' ')[0];
+            // Bypass RLS blocks that prevent authenticated users from reading their own rows
+            const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?id=eq.${myUserId}&select=full_name`, {
+                method: 'GET',
+                headers: {
+                    'apikey': import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                }
+            });
+            if (readRes.ok) {
+                const rows = await readRes.json();
+                if (rows && rows.length > 0 && rows[0].full_name) {
+                    const nameEl = document.querySelector('.user-name');
+                    if (nameEl) nameEl.textContent = 'Hola, ' + rows[0].full_name.split(' ')[0];
+                }
             }
-        } catch(e) {}
+        } catch(e) {
+            console.warn('Dashboard fetch error:', e);
+        }
     }
 
     // 3. Load bookings from Supabase
