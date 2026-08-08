@@ -334,7 +334,8 @@ async function initMatches() {
         console.error("Error fetching mentors:", error);
       } else if (profiles) {
         const excludedIds = [
-            '81ec5383-4036-41a2-9113-aa3d7d705155', // Orphaned Mandia Araya
+            '81ec5383-4036-41a2-9113-aa3d7d705155', // Orphaned Mandia Araya 1
+            '11111111-2222-3333-4444-555555555555', // Orphaned Mandia Araya 2
             '15ca1286-be86-454d-8189-5046b797bf2c'  // Test User
         ];
         allMentors = profiles.filter(p => p.id !== currentUserId && !excludedIds.includes(p.id));
