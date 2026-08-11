@@ -47,6 +47,7 @@ import { supabase, checkAuthSession, supabaseUrl, supabaseKey } from './supabase
     let savedPhrase = localStorage.getItem('wc_profile_phrase') || '';
     let savedNeeds = localStorage.getItem('wc_profile_needs') || '';
     let currentAvatar = localStorage.getItem('wc_profile_image') || 'assets/mentor-isabella.jpg';
+    let savedServices = [];
 
     async function loadData() {
         if (supabase && session) {
@@ -112,6 +113,9 @@ import { supabase, checkAuthSession, supabaseUrl, supabaseKey } from './supabase
                     savedPhrase = data.expertise || data.business_stage || data.businessStage || savedPhrase;
                     savedNeeds = data.bio || (data.pain_points ? data.pain_points.join(', ') : (data.painPoints ? data.painPoints.join(', ') : savedNeeds));
                     currentAvatar = data.profile_photo_url || data.profilePhoto || currentAvatar;
+                    if (data.services) {
+                        savedServices = Array.isArray(data.services) ? data.services : JSON.parse(data.services);
+                    }
                 }
             } catch(e) {
                 console.warn("Could not load from registrations table:", e);
@@ -131,6 +135,87 @@ import { supabase, checkAuthSession, supabaseUrl, supabaseKey } from './supabase
     }
     
     await loadData();
+
+    // Services Logic
+    const servicesList = document.getElementById('services-list');
+    const noServicesMsg = document.getElementById('no-services-msg');
+    const btnAddService = document.getElementById('btn-add-service');
+    const serviceTemplate = document.getElementById('service-item-template');
+
+    function renderServicesList() {
+        if (!servicesList || !serviceTemplate) return;
+        servicesList.innerHTML = '';
+        if (savedServices.length === 0) {
+            noServicesMsg.style.display = 'block';
+        } else {
+            noServicesMsg.style.display = 'none';
+            savedServices.forEach((svc, index) => {
+                const clone = serviceTemplate.content.cloneNode(true);
+                const item = clone.querySelector('.service-item');
+                
+                const typeSelect = item.querySelector('.service-type');
+                const customNameContainer = item.querySelector('.service-custom-name-container');
+                const customNameInput = item.querySelector('.service-custom-name');
+                const priceInput = item.querySelector('.service-price');
+                const btnRemove = item.querySelector('.btn-remove-service');
+
+                typeSelect.value = svc.type || '1-on-1';
+                if (svc.type === 'custom') {
+                    customNameContainer.style.display = 'block';
+                    customNameInput.value = svc.name || '';
+                }
+                priceInput.value = svc.price || '';
+
+                typeSelect.addEventListener('change', (e) => {
+                    if (e.target.value === 'custom') {
+                        customNameContainer.style.display = 'block';
+                    } else {
+                        customNameContainer.style.display = 'none';
+                    }
+                });
+
+                btnRemove.addEventListener('click', () => {
+                    item.remove();
+                    if (servicesList.children.length === 0) {
+                        noServicesMsg.style.display = 'block';
+                    }
+                });
+
+                servicesList.appendChild(item);
+            });
+        }
+    }
+
+    if (btnAddService) {
+        btnAddService.addEventListener('click', () => {
+            noServicesMsg.style.display = 'none';
+            const clone = serviceTemplate.content.cloneNode(true);
+            const item = clone.querySelector('.service-item');
+            
+            const typeSelect = item.querySelector('.service-type');
+            const customNameContainer = item.querySelector('.service-custom-name-container');
+            const btnRemove = item.querySelector('.btn-remove-service');
+
+            typeSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'custom') {
+                    customNameContainer.style.display = 'block';
+                } else {
+                    customNameContainer.style.display = 'none';
+                }
+            });
+
+            btnRemove.addEventListener('click', () => {
+                item.remove();
+                if (servicesList.children.length === 0) {
+                    noServicesMsg.style.display = 'block';
+                }
+            });
+
+            servicesList.appendChild(item);
+        });
+    }
+
+    renderServicesList();
 
     // Toggle Modes
     btnEditMode.addEventListener('click', () => {
@@ -157,6 +242,14 @@ import { supabase, checkAuthSession, supabaseUrl, supabaseKey } from './supabase
         const newName = nameInput.value;
         const newPhrase = phraseInput.value;
         const newNeeds = needsInput.value;
+
+        const newServices = [];
+        document.querySelectorAll('.service-item').forEach(item => {
+            const type = item.querySelector('.service-type').value;
+            const name = type === 'custom' ? item.querySelector('.service-custom-name').value.trim() : '';
+            const price = item.querySelector('.service-price').value.trim();
+            newServices.push({ type, name, price });
+        });
 
         // Try Supabase first
         if (supabase && session) {
@@ -193,6 +286,7 @@ import { supabase, checkAuthSession, supabaseUrl, supabaseKey } from './supabase
                     expertise: newPhrase,
                     pain_points: newNeeds ? newNeeds.split(',').map(s => s.trim()) : [],
                     profile_photo_url: finalAvatarUrl,
+                    services: newServices,
                     auth_directory: true // Default to true if they are saving from profile
                 };
                 
@@ -228,6 +322,7 @@ import { supabase, checkAuthSession, supabaseUrl, supabaseKey } from './supabase
         savedName = newName;
         savedPhrase = newPhrase;
         savedNeeds = newNeeds;
+        savedServices = newServices;
         avatarChanged = false;
         
         // Update View

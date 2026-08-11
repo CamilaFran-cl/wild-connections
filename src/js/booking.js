@@ -23,7 +23,8 @@ import { supabase, checkAuthSession } from './supabase-client.js';
 
     // 2. Get partner ID from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const partnerId = urlParams.get('id');
+    const partnerId = urlParams.get('id') || urlParams.get('mentor');
+    const requestedService = urlParams.get('service');
 
     if (!partnerId) {
         window.location.href = 'matches.html';
@@ -73,6 +74,18 @@ import { supabase, checkAuthSession } from './supabase-client.js';
     if (mentorAvatar) mentorAvatar.src = partner.profilePhoto || 'assets/mentor-isabella.jpg';
     if (mentorName) mentorName.textContent = partner.fullName || 'Mentora';
     if (mentorSpecialty) mentorSpecialty.textContent = partner.expertise || 'Emprendedora';
+
+    if (requestedService) {
+        document.title = `Reservar ${requestedService} | Wild Connections`;
+        const headerTitle = document.querySelector('.mentor-header');
+        if (headerTitle) {
+            const serviceLabel = document.createElement('div');
+            serviceLabel.className = 'badge-tag mt-3';
+            serviceLabel.style.display = 'inline-block';
+            serviceLabel.textContent = `Servicio: ${requestedService}`;
+            headerTitle.appendChild(serviceLabel);
+        }
+    }
 
     // 5. Variables for booking state
     let selectedDateStr = null;
@@ -164,6 +177,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                         booking_date: selectedDateStr,
                         booking_time: selectedTimeStr,
                         topic: topic,
+                        service: requestedService,
                         status: 'pending'
                     });
 
@@ -178,6 +192,10 @@ import { supabase, checkAuthSession } from './supabase-client.js';
             
             // Update Summary UI
             document.getElementById('summaryMentor').textContent = partner.fullName || 'Mentora';
+            if (requestedService) {
+                document.getElementById('summaryServiceContainer').style.display = 'flex';
+                document.getElementById('summaryService').textContent = requestedService;
+            }
             document.getElementById('summaryDate').textContent = selectedDateStr;
             document.getElementById('summaryTime').textContent = selectedTimeStr;
             document.getElementById('summaryTopic').textContent = topic.length > 30 ? topic.substring(0, 30) + '...' : topic;

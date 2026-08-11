@@ -146,6 +146,21 @@
                         <textarea id="profile-needs" class="form-control" placeholder="Describe brevemente quién eres, qué necesitas hoy de la comunidad o qué puedes aportar..."></textarea>
                     </div>
 
+                    <div class="form-group" style="margin-top: var(--space-6); text-align: left;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                            <label class="form-label" style="margin-bottom: 0;">Mis Servicios Ofrecidos</label>
+                            <button type="button" class="btn btn-outline btn-sm" id="btn-add-service" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">+ Añadir Servicio</button>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: var(--space-3);">Configura los servicios (Sesiones 1-on-1, Talleres, etc.) que aparecerán en tu perfil.</p>
+                        
+                        <div id="services-list" style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <!-- Los servicios se renderizarán aquí dinámicamente vía JS -->
+                        </div>
+                        <div id="no-services-msg" style="text-align: center; padding: var(--space-4); background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 0.9rem;">
+                            Aún no has configurado ningún servicio.
+                        </div>
+                    </div>
+
                     <div class="action-buttons">
                         <button type="submit" class="btn btn-gold btn-block shimmer-effect">Guardar Cambios</button>
                         <button type="button" id="btn-cancel-edit" class="btn btn-outline btn-block">Cancelar</button>
@@ -210,6 +225,33 @@
             </a>
         </div>
     </nav>
+
+    <template id="service-item-template">
+        <div class="service-item" style="display: flex; flex-direction: column; gap: var(--space-2); background: rgba(255,255,255,0.02); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); position: relative;">
+            <button type="button" class="btn-remove-service" style="position: absolute; top: var(--space-2); right: var(--space-2); background: none; border: none; color: var(--text-muted); cursor: pointer;" title="Eliminar servicio">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 150px;">
+                    <label class="form-label" style="font-size: 0.8rem; margin-bottom: var(--space-1);">Tipo de Servicio</label>
+                    <select class="form-control service-type" style="padding: 0.5rem; font-size: 0.9rem;">
+                        <option value="1-on-1">Sesiones 1-on-1</option>
+                        <option value="taller">Taller de Escalado</option>
+                        <option value="finanzas">Sesiones de Finanzas</option>
+                        <option value="custom">Personalizado (Otro)</option>
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 150px; display: none;" class="service-custom-name-container">
+                    <label class="form-label" style="font-size: 0.8rem; margin-bottom: var(--space-1);">Nombre del Servicio</label>
+                    <input type="text" class="form-control service-custom-name" placeholder="Ej: Consultoría" style="padding: 0.5rem; font-size: 0.9rem;">
+                </div>
+            </div>
+            <div>
+                <label class="form-label" style="font-size: 0.8rem; margin-bottom: var(--space-1);">Frase de Pago / Precio (Opcional)</label>
+                <input type="text" class="form-control service-price" placeholder="Ej: US$ 50, Pago asociado, Gratis" style="padding: 0.5rem; font-size: 0.9rem;">
+            </div>
+        </div>
+    </template>
 
     <script type="module" src="/js/supabase-client.js"></script>
     <script type="module" src="/js/main.js"></script>

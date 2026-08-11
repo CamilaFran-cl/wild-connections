@@ -322,6 +322,7 @@
         profilePhoto: row.profile_photo_url,
         formComplete: row.form_complete,
         isVip: row.is_vip,
+        services: row.services || [],
         registeredAt: row.registered_at,
         lastUpdated: row.last_updated
       };

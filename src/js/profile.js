@@ -139,10 +139,50 @@ import { supabase } from './supabase-client.js';
         }
     }
 
-    // Update booking buttons to link to the real booking page
-    const bookBtns = document.querySelectorAll('.btn-book');
-    bookBtns.forEach(btn => {
-        btn.href = `booking.html?mentor=${mentor.id}`;
-        btn.style.cursor = 'pointer';
-    });
+    // Render Services
+    const servicesSection = document.getElementById('services-section');
+    const servicesContainer = document.getElementById('dynamic-services');
+    
+    let services = [];
+    if (mentor.services) {
+        try {
+            services = Array.isArray(mentor.services) ? mentor.services : JSON.parse(mentor.services);
+        } catch(e) {
+            console.warn("Could not parse services:", e);
+        }
+    }
+    
+    if (services.length > 0 && servicesSection && servicesContainer) {
+        servicesSection.style.display = 'block';
+        
+        const icons = {
+            '1-on-1': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+            'taller': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+            'finanzas': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+            'custom': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z"></path></svg>'
+        };
+        
+        const labels = {
+            '1-on-1': 'Sesiones 1-on-1',
+            'taller': 'Taller de Escalado',
+            'finanzas': 'Sesiones de Finanzas'
+        };
+        
+        servicesContainer.innerHTML = services.map(svc => {
+            const icon = icons[svc.type] || icons['custom'];
+            const title = svc.type === 'custom' ? svc.name : labels[svc.type];
+            const encodedTitle = encodeURIComponent(title || '');
+            const priceHtml = svc.price ? `<p style="color: var(--gold-primary); font-size: 0.85rem; margin-top: var(--space-2); margin-bottom: 0;">${svc.price}</p>` : '';
+            return `
+                <div class="service-card">
+                    <div class="service-icon icon-box">
+                        ${icon}
+                    </div>
+                    <h4 class="service-name">${title}</h4>
+                    ${priceHtml}
+                    <a href="booking.html?mentor=${mentor.id}&service=${encodedTitle}" class="btn btn-outline btn-sm" style="margin-top: var(--space-3);">Reservar</a>
+                </div>
+            `;
+        }).join('');
+    }
 });

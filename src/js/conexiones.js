@@ -114,6 +114,8 @@ import { supabase } from './supabase-client.js';
                    <button class="btn btn-outline btn-sm cx-action" data-id="${booking.id}" data-action="rejected" style="flex: 1; border-color: rgba(255,100,100,0.4); color: #ff8888;">Rechazar</button>`
                 : `<a href="chat.html?partner=${partner.id || booking.requester_id}" class="btn btn-outline btn-sm" style="flex: 1;">💬 Mensaje</a>`;
 
+        const serviceText = booking.service ? `<span class="badge-tag mt-2" style="display:inline-block; font-size: 0.75rem;">Servicio: ${booking.service}</span>` : '';
+
         return `
             <div class="card card-interactive hover-lift-glow" style="display: flex; flex-direction: column; gap: var(--space-4);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -123,7 +125,8 @@ import { supabase } from './supabase-client.js';
                 <div>
                     <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: 4px;">${name}</h3>
                     <p class="text-secondary text-sm">${expertise}</p>
-                    <p class="text-secondary text-sm" style="margin-top: 4px;">📅 ${booking.booking_date} · ${booking.booking_time}</p>
+                    ${serviceText}
+                    <p class="text-secondary text-sm" style="margin-top: 8px;">📅 ${booking.booking_date} · ${booking.booking_time}</p>
                 </div>
                 <div style="border-top: 1px solid var(--border); padding-top: var(--space-4); margin-top: auto; display: flex; gap: var(--space-2);">
                     ${actionsHtml}
