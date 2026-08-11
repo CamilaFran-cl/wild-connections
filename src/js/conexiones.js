@@ -38,12 +38,27 @@ import { supabase } from './supabase-client.js';
 
                 let profileMap = {};
                 if (partnerIds.size > 0) {
-                    const { data: profiles } = await supabase
-                        .from('registrations')
-                        .select('id, fullName, expertise, profilePhoto')
-                        .in('id', [...partnerIds]);
-                    if (profiles) {
-                        profiles.forEach(p => profileMap[p.id] = p);
+                    const idsParam = [...partnerIds].join(',');
+                    const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?id=in.(${idsParam})&select=id,full_name,expertise,profile_photo_url`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=representation'
+                        }
+                    });
+                    
+                    if (readRes.ok) {
+                        const profiles = await readRes.json();
+                        profiles.forEach(p => {
+                            profileMap[p.id] = {
+                                id: p.id,
+                                fullName: p.full_name,
+                                expertise: p.expertise,
+                                profilePhoto: p.profile_photo_url
+                            };
+                        });
                     }
                 }
 

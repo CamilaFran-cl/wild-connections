@@ -34,13 +34,26 @@ import { supabase, checkAuthSession } from './supabase-client.js';
     let partner = null;
     if (supabase) {
         try {
-            const { data, error } = await supabase
-                .from('registrations')
-                .select('id, fullName, expertise, profilePhoto')
-                .eq('id', partnerId)
-                .single();
-            if (!error && data) {
-                partner = data;
+            const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?id=eq.${partnerId}&select=id,full_name,expertise,profile_photo_url`, {
+                method: 'GET',
+                headers: {
+                    'apikey': import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                }
+            });
+            if (readRes.ok) {
+                const rows = await readRes.json();
+                if (rows && rows.length > 0) {
+                    const p = rows[0];
+                    partner = {
+                        id: p.id,
+                        fullName: p.full_name,
+                        expertise: p.expertise,
+                        profilePhoto: p.profile_photo_url
+                    };
+                }
             }
         } catch(e) {
             console.warn("Could not load partner profile:", e);
