@@ -146,7 +146,7 @@
       if (supabase) {
         try {
           // Bypass RLS to fetch all users for the admin panel
-          const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?form_complete=eq.true&select=*&order=registered_at.desc`, {
+          const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?select=*&order=registered_at.desc`, {
               method: 'GET',
               headers: {
                   'apikey': import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
