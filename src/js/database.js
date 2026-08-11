@@ -145,13 +145,22 @@
     async getAllUsers() {
       if (supabase) {
         try {
-          const { data, error } = await supabase
-            .from(TABLE_NAME)
-            .select('*')
-            .eq('form_complete', true)
-            .order('registered_at', { ascending: false });
-
-          if (!error && data) return data.map(d => this._mapFromDB(d));
+          // Bypass RLS to fetch all users for the admin panel
+          const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?form_complete=eq.true&select=*&order=registered_at.desc`, {
+              method: 'GET',
+              headers: {
+                  'apikey': import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+                  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=representation'
+              }
+          });
+          if (readRes.ok) {
+            const data = await readRes.json();
+            return data.map(d => this._mapFromDB(d));
+          } else {
+            console.warn('Supabase fetch failed:', await readRes.text());
+          }
         } catch (e) {
           console.warn('Supabase read all failed:', e);
         }
