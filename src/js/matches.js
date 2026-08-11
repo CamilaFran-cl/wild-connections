@@ -158,7 +158,7 @@ function renderMentors(filterText = '') {
   }
   
   const hasUserData = Object.keys(userData).length > 0;
-  const isVip = !!localStorage.getItem('wc_user_plan'); // Temporarily keep localStorage for VIP check
+  const isVip = localStorage.getItem('wc_user_plan') === 'vip';
 
   // Calculate matches
   const enrichedMentors = allMentors.map(mentor => {
@@ -194,13 +194,20 @@ function renderMentors(filterText = '') {
   // Sort by combined score
   enrichedMentors.sort((a, b) => b.combinedScore - a.combinedScore);
 
+  // VIP sorting boost (VIPs appear first)
+  enrichedMentors.sort((a, b) => {
+    const aIsVip = a.is_vip ? 1 : 0;
+    const bIsVip = b.is_vip ? 1 : 0;
+    return bIsVip - aIsVip; 
+  });
+
   if (enrichedMentors.length === 0) {
     container.innerHTML = `<p class="text-secondary text-center" style="padding: 2rem;">No se encontraron resultados para "${filterText}".</p>`;
     return;
   }
 
   enrichedMentors.forEach(mentor => {
-    const commercialBadge = mentor.commercialScore > 20
+    const commercialBadge = (mentor.commercialScore > 20 && isVip)
       ? `<span style="font-size: 0.7rem; color: var(--gold-primary); margin-left: 8px;">💼 Match Comercial</span>`
       : '';
 
@@ -210,6 +217,7 @@ function renderMentors(filterText = '') {
     
     const avatarImg = mentor.profile_photo_url || mentor.profilePhoto || 'assets/mentor-isabella.jpg';
     const mentorName = mentor.full_name || mentor.fullName || 'Mentora';
+    const vipCrown = mentor.is_vip ? '<span title="Mentora VIP" style="margin-left: 4px; font-size: 1.1em;">👑</span>' : '';
     const mentorSpecialty = mentor.expertise || mentor.business_stage || mentor.businessStage || 'Emprendedora';
     const initials = mentorName.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
 
@@ -223,7 +231,7 @@ function renderMentors(filterText = '') {
 
     <div style="flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
-            <h3 style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0;">${mentorName}</h3>
+            <h3 style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0;">${mentorName}${vipCrown}</h3>
             <span style="font-size: 0.75rem; color: var(--gold-primary); font-weight: 500;">${mentor.bffScore}%</span>
             ${commercialBadge}
         </div>

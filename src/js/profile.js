@@ -130,6 +130,15 @@ import { supabase } from './supabase-client.js';
         ctaName.textContent = firstName;
     }
 
+    // Hide CTA if viewer is already VIP
+    const isViewerVip = localStorage.getItem('wc_user_plan') === 'vip';
+    if (isViewerVip) {
+        const ctaBlock = document.querySelector('.profile-cta');
+        if (ctaBlock) {
+            ctaBlock.style.display = 'none';
+        }
+    }
+
     // Update booking buttons to link to the real booking page
     const bookBtns = document.querySelectorAll('.btn-book');
     bookBtns.forEach(btn => {

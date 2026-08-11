@@ -311,6 +311,7 @@
         additionalNotes: row.additional_notes,
         profilePhoto: row.profile_photo_url,
         formComplete: row.form_complete,
+        isVip: row.is_vip,
         registeredAt: row.registered_at,
         lastUpdated: row.last_updated
       };

@@ -149,7 +149,7 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                     const uid = data?.session?.user?.id;
                     if (uid) {
                         try {
-                            const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?id=eq.${uid}&select=profile_photo_url`, {
+                            const readRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/registrations?id=eq.${uid}&select=profile_photo_url,is_vip`, {
                                 method: 'GET',
                                 headers: {
                                     'apikey': import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
@@ -160,14 +160,24 @@ import { supabase, checkAuthSession } from './supabase-client.js';
                             });
                             if (readRes.ok) {
                                 const rows = await readRes.json();
-                                if (rows && rows.length > 0 && rows[0].profile_photo_url) {
-                                    const realAvatar = rows[0].profile_photo_url;
-                                    localStorage.setItem('wc_profile_image', realAvatar);
-                                    document.querySelectorAll('.nav-profile-avatar img, .mobile-nav-inner img').forEach(img => {
-                                        img.src = realAvatar;
-                                        img.style.display = 'inline-block';
-                                        if (img.parentElement.classList.contains('nav-profile-avatar')) img.style.display = 'block';
-                                    });
+                                if (rows && rows.length > 0) {
+                                    const row = rows[0];
+                                    if (row.profile_photo_url) {
+                                        const realAvatar = row.profile_photo_url;
+                                        localStorage.setItem('wc_profile_image', realAvatar);
+                                        document.querySelectorAll('.nav-profile-avatar img, .mobile-nav-inner img').forEach(img => {
+                                            img.src = realAvatar;
+                                            img.style.display = 'inline-block';
+                                            if (img.parentElement.classList.contains('nav-profile-avatar')) img.style.display = 'block';
+                                        });
+                                    }
+                                    
+                                    // Update VIP status locally
+                                    if (row.is_vip) {
+                                        localStorage.setItem('wc_user_plan', 'vip');
+                                    } else {
+                                        localStorage.setItem('wc_user_plan', 'free');
+                                    }
                                 }
                             }
                         } catch(e) {

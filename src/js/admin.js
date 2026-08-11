@@ -139,11 +139,64 @@
                         </div>
                     </td>
                     <td><span class="badge ${stage.class}">${stage.text}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-vip-toggle ${user.isVip ? 'btn-gold' : 'btn-outline'}" data-id="${user.id}" data-vip="${user.isVip ? 'true' : 'false'}" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 4px;">
+                            ${user.isVip ? '👑 VIP' : 'Normal'}
+                        </button>
+                    </td>
                     <td>${revenue}</td>
                     <td style="color: var(--text-secondary); font-size: 0.85rem;">${dateStr}</td>
                 </tr>
             `;
         }).join('');
+
+        // Attach event listeners to VIP toggles
+        document.querySelectorAll('.btn-vip-toggle').forEach(btn => {
+            btn.addEventListener('click', handleVipToggle);
+        });
+    }
+
+    async function handleVipToggle(e) {
+        const btn = e.currentTarget;
+        const id = btn.getAttribute('data-id');
+        const isVip = btn.getAttribute('data-vip') === 'true';
+        const newVipStatus = !isVip;
+
+        const adminPin = prompt('Por favor, ingresa el PIN de administrador para cambiar el estado VIP:');
+        if (!adminPin) return;
+
+        btn.textContent = '...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/set-vip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, isVip: newVipStatus, adminPin })
+            });
+
+            if (res.ok) {
+                btn.setAttribute('data-vip', newVipStatus);
+                if (newVipStatus) {
+                    btn.classList.remove('btn-outline');
+                    btn.classList.add('btn-gold');
+                    btn.textContent = '👑 VIP';
+                } else {
+                    btn.classList.remove('btn-gold');
+                    btn.classList.add('btn-outline');
+                    btn.textContent = 'Normal';
+                }
+            } else {
+                const data = await res.json();
+                alert('Error al actualizar VIP: ' + (data.error || 'Error desconocido'));
+                btn.textContent = isVip ? '👑 VIP' : 'Normal';
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión');
+            btn.textContent = isVip ? '👑 VIP' : 'Normal';
+        }
+        btn.disabled = false;
     }
 
     // --- 5. Search Filtering ---
