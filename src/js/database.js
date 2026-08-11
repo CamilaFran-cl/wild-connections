@@ -290,6 +290,7 @@
      */
     _mapFromDB(row) {
       return {
+        id: row.id,
         fullName: row.full_name,
         location: row.location,
         instagram: row.instagram,
